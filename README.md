@@ -1,3 +1,3 @@
-# helloworld20180805
+Fermi GBM burst catalog
 
 #print('helloworld')
