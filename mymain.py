@@ -2,7 +2,6 @@ import matplotlib
 matplotlib.use('Agg')
 from GBM_catalog_spectralanalysis_lib import *
 
-# ALWAYS RUN THIS MAIN FUNCTION #
 def main():
 	fermigbrst=query_fermigbrst()
 	df=pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
