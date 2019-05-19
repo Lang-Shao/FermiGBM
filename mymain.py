@@ -59,7 +59,7 @@ def inspect_GRB(bnname):
 				f.write('missing data')
 		
 
-# DO NOT REMOVE THIS PART #
+# Always run this Main part #
 if __name__ == '__main__':
 	#main()
 	inspect_GRB('bn190114873')

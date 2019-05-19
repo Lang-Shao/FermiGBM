@@ -30,10 +30,12 @@ import rpy2.robjects.numpy2ri
 robjects.numpy2ri.activate()
 robjects.r("library(baseline)")
 from xspec import *
+from personal_settings import *
 
 
-databasedir='/home/lang/work/GBM/burstdownload/data/'
+#databasedir='/home/lang/work/GBM/burstdownload/data/'
 #databasedir='/diskb/Database/Fermi/gbm_burst/data/'
+databasedir=get_databasedir()
 NaI=['n0','n1','n2','n3','n4','n5',\
 	'n6','n7','n8','n9','na','nb']
 BGO=['b0','b1']
@@ -43,7 +45,8 @@ Det=['b0','b1','n0','n1','n2','n3','n4','n5',\
 #ignore 0,1,2,125,126,127, notice 3-124
 ch1=3
 ch2=124
-ncore=2
+ncore=get_ncore()
+#ncore=2
 ##################
 # SOME FUNCTIONS #
 ##################
@@ -249,7 +252,7 @@ def copy_rspI(bnname,det,outfile):
 class GRB:
 	def __init__(self,bnname):
 		self.bnname=bnname
-		resultdir=os.getcwd()+'/results/'
+		resultdir=os.getcwd()+'/../results/'
 		self.resultdir=resultdir+'/'+bnname+'/'
 		shortyear=self.bnname[2:4]
 		fullyear='20'+shortyear
