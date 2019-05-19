@@ -252,7 +252,7 @@ def copy_rspI(bnname,det,outfile):
 class GRB:
 	def __init__(self,bnname):
 		self.bnname=bnname
-		resultdir=os.getcwd()+'/../results/'
+		resultdir=os.getcwd()+'/results/'
 		self.resultdir=resultdir+'/'+bnname+'/'
 		shortyear=self.bnname[2:4]
 		fullyear='20'+shortyear
