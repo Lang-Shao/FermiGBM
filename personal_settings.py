@@ -3,10 +3,10 @@
 
 
 def get_databasedir():
-	databasedir='/home/lang/work/GBM/burstdownload/data/'
-	#databasedir='/diskb/Database/Fermi/gbm_burst/data/'
+	#databasedir='/home/lang/work/GBM/burstdownload/data/'
+	databasedir='/diskb/Database/Fermi/gbm_burst/data/'
 	return databasedir
 
 def get_ncore():
-	ncore=3
+	ncore=80
 	return ncore

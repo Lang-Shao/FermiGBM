@@ -105,8 +105,7 @@ def format_countmap_axes(ax, title, x1, x2,ymajor_ticks):
 	#ax.yaxis.set_minor_locator(ticker.FixedLocator(yminor_ticks))
 	#ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 	#ax.yaxis.set_minor_formatter(ticker.FormatStrFormatter('%d'))
-	ax.tick_params(axis='both',top=True,right=True,length=5,width=2,\
-								direction='out',which='both',labelsize=25)
+	ax.tick_params(axis='both',top=True,right=True,length=5,width=2,direction='out',which='both',labelsize=25)
 
 def plot_countmap(bnname,resultdir,baseresultdir,datadir,content,tbins,viewt1,viewt2): 
 	# content=['rate','base','net']
@@ -118,14 +117,11 @@ def plot_countmap(bnname,resultdir,baseresultdir,datadir,content,tbins,viewt1,vi
 		#data in firt and last two channels of BGO and NaI are not shown
 		#ignore 0,1,126,127, notice 2-125
 		if content=='rate':
-			C=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][0] \
-									for ch in np.arange(ch1,ch2+1) ])
+			C=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][0] for ch in np.arange(ch1,ch2+1) ])
 		elif content=='base':
-			C=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][1] \
-									for ch in np.arange(ch1,ch2+1) ])
+			C=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][1] for ch in np.arange(ch1,ch2+1) ])
 		elif content=='net':
-			C=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+			C=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 		if i<=1:
 			if BGOmaxcolorvalue < C.max():
 				BGOmaxcolorvalue = C.max()
@@ -144,32 +140,23 @@ def plot_countmap(bnname,resultdir,baseresultdir,datadir,content,tbins,viewt1,vi
 		y = np.concatenate((emin,[emax[-1]]))
 		X, Y = np.meshgrid(x, y)
 		if content=='rate':
-			C=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][0] \
-									for ch in np.arange(ch1,ch2+1) ])
+			C=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][0] for ch in np.arange(ch1,ch2+1) ])
 		elif content=='base':
-			C=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][1] \
-									for ch in np.arange(ch1,ch2+1) ])
+			C=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][1] for ch in np.arange(ch1,ch2+1) ])
 		elif content=='net':
-			C=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+			C=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 		C[C<1]=1
 		if i<=1:
-			pcmBGO = axes[i//2,i%2].pcolormesh(X, Y, C,norm=\
-					colors.LogNorm(vmin=1.0, vmax=BGOmaxcolorvalue),\
-													cmap='rainbow')
-			format_countmap_axes(axes[i//2,i%2],Det[i],tbins[0],\
-											tbins[-1],[1000,10000])
+			pcmBGO = axes[i//2,i%2].pcolormesh(X, Y, C,\
+				norm=colors.LogNorm(vmin=1.0, vmax=BGOmaxcolorvalue),cmap='rainbow')
+			format_countmap_axes(axes[i//2,i%2],Det[i],tbins[0],tbins[-1],[1000,10000])
 		else:
-			pcmNaI = axes[i//2,i%2].pcolormesh(X, Y, C,norm=\
-					colors.LogNorm(vmin=1.0, vmax=NaImaxcolorvalue),\
-													cmap='rainbow')
-			format_countmap_axes(axes[i//2,i%2],Det[i],tbins[0],\
-											tbins[-1],[10,100])
+			pcmNaI = axes[i//2,i%2].pcolormesh(X, Y, C,\
+				norm=colors.LogNorm(vmin=1.0, vmax=NaImaxcolorvalue),cmap='rainbow')
+			format_countmap_axes(axes[i//2,i%2],Det[i],tbins[0],tbins[-1],[10,100])
 		axes[i//2,i%2].set_xlim([viewt1,viewt2])				
-	cbarBGO=fig.colorbar(pcmBGO, ax=axes[0,], orientation='vertical', \
-										fraction=0.005, aspect=100/6)
-	cbarNaI=fig.colorbar(pcmNaI, ax=axes[1:,], orientation='vertical', \
-										fraction=0.005, aspect=100)
+	cbarBGO=fig.colorbar(pcmBGO, ax=axes[0,], orientation='vertical',fraction=0.005, aspect=100/6)
+	cbarNaI=fig.colorbar(pcmNaI, ax=axes[1:,], orientation='vertical',fraction=0.005, aspect=100)
 	cbarBGO.ax.tick_params(labelsize=25)
 	cbarNaI.ax.tick_params(labelsize=25)
 	fig.text(0.07, 0.5, 'Energy (KeV)', ha='center', va='center', rotation='vertical',fontsize=30)
@@ -334,13 +321,10 @@ class GRB:
 				axes[i//2,i%2].plot(histbin,plotrate,linestyle='steps')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				axes[i//2,i%2].tick_params(labelsize=25)
-				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=\
-									axes[i//2,i%2].transAxes,fontsize=25)
-				axes[i//2,i%2].text(0.7,0.80,str(round(emin[0],1))+'-'+\
-										str(round(emax[-1],1))+' keV',\
-								transform=axes[i//2,i%2].transAxes,fontsize=25)
-			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
-												 rotation='vertical',fontsize=30)
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+				axes[i//2,i%2].text(0.7,0.80,str(round(emin[0],1))+'-'+str(round(emax[-1],1))+' keV',\
+					transform=axes[i//2,i%2].transAxes,fontsize=25)
+			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
 			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)
 			plt.savefig(self.resultdir+'/raw_lc.png')
@@ -359,8 +343,7 @@ class GRB:
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='w')
 			for i in range(14):
 				grp=f.create_group(Det[i])
-				ttefile=glob(self.datadir+'/'+'glg_tte_'+Det[i]+'_'+\
-											self.bnname+'_v*.fit')
+				ttefile=glob(self.datadir+'/'+'glg_tte_'+Det[i]+'_'+self.bnname+'_v*.fit')
 				hdu=fits.open(ttefile[0])	
 				trigtime=hdu['Primary'].header['TRIGTIME']
 				data=hdu['EVENTS'].data
@@ -380,8 +363,7 @@ class GRB:
 					#					+fillPeak_int+", method='fillPeaks')")
 					fillPeak_hwi=str(int(5/binwidth))
 					fillPeak_int=str(int(len(rate)/10))
-					r("rbase=baseline(y,lam = 6, hwi="+fillPeak_hwi+", it=10,\
-								 int ="+fillPeak_int+", method='fillPeaks')")
+					r("rbase=baseline(y,lam = 6, hwi="+fillPeak_hwi+", it=10,int ="+fillPeak_int+", method='fillPeaks')")
 					r("bs=getBaseline(rbase)")
 					r("cs=getCorrected(rbase)")
 					bs=r('bs')[0]
@@ -397,8 +379,7 @@ class GRB:
 	def plotbase(self):
 		self.plotbasedir=self.resultdir+'/plotbase/'
 		if not os.path.exists(self.plotbasedir):
-			assert os.path.exists(self.baseresultdir), \
-						'Should have run base() before running plotbase()!'
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running plotbase()!'
 			#print('plotting base ...')
 			os.makedirs(self.plotbasedir)
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
@@ -407,18 +388,14 @@ class GRB:
 				for i in range(14):
 					plotrate=f['/'+Det[i]+'/ch'+str(ch)][()][0] #rate
 					plotrate=np.concatenate(([plotrate[0]],plotrate))
-					axes[i//2,i%2].plot(self.tbins,plotrate,linestyle='steps',lw=3.0,\
-																color='tab:blue')
+					axes[i//2,i%2].plot(self.tbins,plotrate,linestyle='steps',lw=3.0,color='tab:blue')
 					plotbase=f['/'+Det[i]+'/ch'+str(ch)][()][1] #base
 					plottime=self.tbins[:-1]+self.binwidth/2.0
-					axes[i//2,i%2].plot(plottime,plotbase,linestyle='--',lw=4.0,\
-																color='tab:orange')
+					axes[i//2,i%2].plot(plottime,plotbase,linestyle='--',lw=4.0,color='tab:orange')
 					axes[i//2,i%2].set_xlim([self.tbins[0],self.tbins[-1]])
 					axes[i//2,i%2].tick_params(labelsize=25)
-					axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-															transAxes,fontsize=25)
-				fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
-													 rotation='vertical',fontsize=30)
+					axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+				fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',rotation='vertical',fontsize=30)
 				fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
 				fig.text(0.5, 0.92, 'ch'+str(ch), ha='center', va='center',fontsize=30)			
 				plt.savefig(self.plotbasedir+'/ch_'+str(ch)+'.png')
@@ -428,23 +405,19 @@ class GRB:
 
 	def check_gaussian_total_rate(self):
 		if not os.path.exists(self.resultdir+'/check_gaussian_total_rate.png'):
-			assert os.path.exists(self.baseresultdir), \
-						'Should have run base() before running base_stats()!'
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
 			#print('plotting check_gaussian_total_rate.png ...')
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=False,sharey=False)
 			for i in range(14):
-				cRate=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][0] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cRate=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][0] for ch in np.arange(ch1,ch2+1) ])
 				totalRate=np.sum(cRate,axis=0)
 				median=np.median(totalRate)
 				totalRate_median_part=totalRate[(totalRate>(0.1*median)) & (totalRate<(1.5*median))]
-				bins=np.arange(totalRate.min(),totalRate.max(),\
-					(totalRate_median_part.max()-totalRate_median_part.min())/30)
+				bins=np.arange(totalRate.min(),totalRate.max(),(totalRate_median_part.max()-totalRate_median_part.min())/30)
 				histvalue, histbin =np.histogram(totalRate,bins=bins)
 				histvalue=np.concatenate(([histvalue[0]],histvalue))
-				axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',\
-											label='Observed total rate')			
+				axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',label='Observed total rate')			
 				loc,scale=stats.norm.fit(totalRate_median_part)
 				Y=stats.norm(loc=loc,scale=scale)
 				x=np.linspace(totalRate_median_part.min(),totalRate_median_part.max(),num=100)
@@ -452,15 +425,12 @@ class GRB:
 								label='Gaussian Distribution',\
 								linestyle='--',lw=3.0,color='tab:orange')
 				axes[i//2,i%2].tick_params(labelsize=25)
-				axes[i//2,i%2].text(0.5,0.8,Det[i],transform=axes[i//2,i%2].\
-													transAxes,fontsize=25)
-				axes[i//2,i%2].axvline(totalRate_median_part.min(),ls='--',\
-									lw=1,color='k',label='Fitting region')
+				axes[i//2,i%2].text(0.5,0.8,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+				axes[i//2,i%2].axvline(totalRate_median_part.min(),ls='--',lw=1,color='k',label='Fitting region')
 				axes[i//2,i%2].axvline(totalRate_median_part.max(),ls='--',lw=1,color='k')
 				if i==1:
 					axes[i//2,i%2].legend(fontsize=20)
-			fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',\
-											 rotation='vertical',fontsize=30)
+			fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Total raw rate (s$^{-1}$; between '+str(self.baset1)+'--'+str(self.baset2)+'s)',\
 			    					 ha='center', va='center',fontsize=30)		
 			plt.savefig(self.resultdir+'/check_gaussian_total_rate.png')
@@ -469,23 +439,19 @@ class GRB:
 
 	def check_gaussian_net_rate(self,sigma=3):
 		if not os.path.exists(self.resultdir+'/check_gaussian_net_rate.png'):
-			assert os.path.exists(self.baseresultdir), \
-						'Should have run base() before running base_stats()!'
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
 			#print('plotting check_gaussian_total_rate.png ...')
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=False,sharey=False)
 			for i in range(14):
-				cRate=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cRate=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				netRate=np.sum(cRate,axis=0)
 				median=np.median(netRate)
 				netRate_median_part=netRate[netRate<5*median]
-				bins=np.arange(netRate.min(),netRate.max(),\
-					(netRate_median_part.max()-netRate_median_part.min())/30)
+				bins=np.arange(netRate.min(),netRate.max(),(netRate_median_part.max()-netRate_median_part.min())/30)
 				histvalue, histbin =np.histogram(netRate,bins=bins)
 				histvalue=np.concatenate(([histvalue[0]],histvalue))
-				axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',\
-											label='Observed net rate')
+				axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',label='Observed net rate')
 				loc,scale=stats.norm.fit(netRate_median_part)
 				Y=stats.norm(loc=loc,scale=scale)
 				x=np.linspace(netRate_median_part.min(),netRate_median_part.max(),num=100)
@@ -494,8 +460,7 @@ class GRB:
 								linestyle='--',lw=3.0,color='tab:orange')
 				#axes[i//2,i%2].set_xlim([0.1*median,2*median])
 				axes[i//2,i%2].tick_params(labelsize=25)
-				axes[i//2,i%2].text(0.5,0.8,Det[i],transform=axes[i//2,i%2].\
-													transAxes,fontsize=25)
+				axes[i//2,i%2].text(0.5,0.8,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 				#axes[i//2,i%2].axvline(median,lw=1,ls='--',color='k',zorder=2)
 				#axes[i//2,i%2].axvline(netRate_median_part.min(),lw=1,color='k',alpha=0.3)
 				#axes[i//2,i%2].axvline(netRate_median_part.max(),lw=1,color='k',alpha=0.3)
@@ -504,18 +469,16 @@ class GRB:
 				axes[i//2,i%2].axvline(gaussian_level[1],ls='--',lw=2,color='green')
 				if i==1:
 					axes[i//2,i%2].legend(fontsize=20)
-			fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',\
-											 rotation='vertical',fontsize=30)
+			fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Total net rate (s$^{-1}$; between '+str(self.baset1)+'--'+str(self.baset2)+'s)',\
-			    					 ha='center', va='center',fontsize=30)		
+				ha='center', va='center',fontsize=30)		
 			plt.savefig(self.resultdir+'/check_gaussian_net_rate.png')
 			plt.close()
 			f.close()
 
 	def plot_gaussian_level_over_net_lc(self,viewt1=-50,viewt2=300,sigma=3):
 		if not os.path.exists(self.resultdir+'/gaussian_level_over_net_lc.png'):
-			assert os.path.exists(self.baseresultdir), \
-						'Should have run base() before running base_stats()!'
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
 			#print('plotting check_gaussian_total_rate.png ...')
 			viewt1=np.max([self.baset1,viewt1])
 			viewt2=np.min([self.baset2,viewt2])
@@ -523,8 +486,7 @@ class GRB:
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=False)
 			ylim=np.zeros((14,2))
 			for i in range(14):
-				cNet=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
 				median=np.median(totalNet)
 				totalNet_median_part=totalNet[totalNet<5*median]
@@ -532,15 +494,13 @@ class GRB:
 				Y=stats.norm(loc=loc,scale=scale)
 				gaussian_level=Y.interval(norm_pvalue(sigma))
 				totalNet=np.concatenate(([totalNet[0]],totalNet))
-				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',lw=3.0,\
-															color='tab:blue')
+				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',lw=3.0,color='tab:blue')
 				axes[i//2,i%2].axhline(gaussian_level[1],ls='--',lw=3,\
 					color='orange',label=str(sigma)+'$\sigma$ level of gaussian background')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				ylim[i]=axes[i//2,i%2].get_ylim()
-				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-														transAxes,fontsize=25)
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 				if i==1:
 					axes[i//2,i%2].legend(fontsize=20)
 			#reset the ylims to same values
@@ -551,8 +511,7 @@ class GRB:
 					axes[i//2,i%2].set_ylim([0,BGOymax])
 				else:
 					axes[i//2,i%2].set_ylim([0,NaIymax])
-			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
-												 rotation='vertical',fontsize=30)
+			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
 			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)		
 			plt.savefig(self.resultdir+'/gaussian_level_over_net_lc.png')
@@ -562,8 +521,7 @@ class GRB:
 # check pulse based on plot_gauss_level_over_net_lc above
 	def check_pulse(self,viewt1=-50,viewt2=300,sigma=3):
 		if not os.path.exists(self.resultdir+'/check_pulse.png'):
-			assert os.path.exists(self.baseresultdir), \
-						'Should have run base() before running base_stats()!'
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
 			#print('plotting check_gaussian_total_rate.png ...')
 			viewt1=np.max([self.baset1,viewt1])
 			viewt2=np.min([self.baset2,viewt2])
@@ -576,8 +534,7 @@ class GRB:
 			badIndex=[]
 			#search for signals over guassian level
 			for i in range(14):
-				cNet=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
 				median=np.median(totalNet)
 				totalNet_median_part=totalNet[totalNet<5*median]
@@ -608,8 +565,7 @@ class GRB:
 						goodIndex.remove(element+kk)
 			#make plots												
 			for i in range(14):
-				cNet=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
 				median=np.median(totalNet)
 				totalNet_median_part=totalNet[totalNet<5*median]
@@ -617,8 +573,7 @@ class GRB:
 				Y=stats.norm(loc=loc,scale=scale)
 				gaussian_level=Y.interval(norm_pvalue(sigma))
 				totalNet=np.concatenate(([totalNet[0]],totalNet))
-				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',lw=3.0,\
-															color='tab:blue')
+				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',lw=3.0,color='tab:blue')
 				axes[i//2,i%2].axhline(gaussian_level[1],ls='--',lw=3,\
 					color='orange',label=str(sigma)+'$\sigma$ level of gaussian background')
 				axes[i//2,i%2].tick_params(labelsize=25)
@@ -629,13 +584,11 @@ class GRB:
 					x0=self.tbins[goodIndex_sorted[0]]
 					x1=self.tbins[goodIndex_sorted[-1]]
 					x_width=np.max([x1-x0,2.0])
-					axes[i//2,i%2].set_xlim([np.max([x0-x_width,viewt1]),\
-											np.min([x1+x_width,viewt2])])
+					axes[i//2,i%2].set_xlim([ np.max([x0-x_width,viewt1]),np.min([x1+x_width,viewt2]) ])
 				else:
 					axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				ylim[i]=axes[i//2,i%2].get_ylim()
-				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-													transAxes,fontsize=25)
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 			#reset the ylims to same values
 			BGOymax=np.max([ylim[i,1] for i in range(2)])
 			NaIymax=np.max([ylim[i+2,1] for i in range(12)])	
@@ -646,8 +599,7 @@ class GRB:
 					axes[i//2,i%2].set_ylim([0,BGOymax])
 				else:
 					axes[i//2,i%2].set_ylim([0,NaIymax])
-			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
-												 rotation='vertical',fontsize=30)
+			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)
 			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)		
 			plt.savefig(self.resultdir+'/check_pulse.png')
@@ -680,15 +632,13 @@ class GRB:
 								label='Observed count (from rate)', lw=4.0,\
 								color='tab:blue')	
 					axes[i//2,i%2].tick_params(labelsize=25)
-					axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-														transAxes,fontsize=25)
+					axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 					if i==1:
 						axes[i//2,i%2].legend(fontsize=20)
-				fig.text(0.07, 0.5, 'Normalized histogram (PMF)', ha='center', va='center',\
-												 rotation='vertical',fontsize=30)
-				fig.text(0.5, 0.05, 'Count in each time bin ('+str(self.binwidth)+\
-						' s) between '+str(self.baset1)+'--'+str(self.baset2)+' s',\
-										 ha='center', va='center',fontsize=30)
+				fig.text(0.07, 0.5, 'Normalized histogram (PMF)', ha='center', va='center',rotation='vertical',fontsize=30)
+				fig.text(0.5, 0.05, 'Count in each time bin ('+str(self.binwidth)+' s) between '+\
+									str(self.baset1)+'--'+str(self.baset2)+' s',\
+									ha='center', va='center',fontsize=30)
 				fig.text(0.5, 0.92, 'ch'+str(ch), ha='center', va='center',fontsize=30)		
 				plt.savefig(self.resultdir+'/poisson_rate/'+str(ch)+'.png')
 				plt.close()
@@ -706,13 +656,10 @@ class GRB:
 						for ch in np.arange(ch1,ch2+1):
 							ds=f['/'+Det[i]+'/ch'+str(ch)][()][2] #net
 							spectrum[ch-ch1]=np.abs(ds[n]*self.binwidth)
-						axes[i//2,i%2].bar(np.arange(ch1,ch2+1),spectrum,\
-													lw=4.0,color='tab:blue')
+						axes[i//2,i%2].bar(np.arange(ch1,ch2+1),spectrum,lw=4.0,color='tab:blue')
 						axes[i//2,i%2].tick_params(labelsize=25)
-						axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-															transAxes,fontsize=25)
-					fig.text(0.07, 0.5, 'Count spectrum', ha='center', va='center',\
-													 rotation='vertical',fontsize=30)
+						axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+					fig.text(0.07, 0.5, 'Count spectrum', ha='center', va='center',rotation='vertical',fontsize=30)
 					fig.text(0.5, 0.05, 'Channels',ha='center', va='center',fontsize=30)
 					fig.text(0.5, 0.92, str(t1)+' s', ha='center', va='center',fontsize=30)		
 					plt.savefig(self.resultdir+'/time_resolved_net_spectrum/'+str(n)+'.png')
@@ -749,12 +696,10 @@ class GRB:
 						#axes[i//2,i%2].bar(np.arange(2,126),spectrum,\
 						#			color='tab:blue')	
 						axes[i//2,i%2].tick_params(labelsize=25)
-						axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-															transAxes,fontsize=25)
+						axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 						if i==1:
 							axes[i//2,i%2].legend(fontsize=20)
-					fig.text(0.07, 0.5, 'Normalized histogram (PMF)', ha='center', va='center',\
-													 rotation='vertical',fontsize=30)
+					fig.text(0.07, 0.5, 'Normalized histogram (PMF)', ha='center', va='center',rotation='vertical',fontsize=30)
 					fig.text(0.5, 0.05, 'Counts',ha='center', va='center',fontsize=30)
 					fig.text(0.5, 0.92, str(t1)+' s', ha='center', va='center',fontsize=30)		
 					plt.savefig(self.resultdir+'/check_poisson_time_resolved_net_spectrum/'+str(n)+'.png')
@@ -763,8 +708,7 @@ class GRB:
 
 	def netlc(self,viewt1=-50,viewt2=300):
 		if not os.path.exists(self.resultdir+'/net_lc.png'):
-			assert os.path.exists(self.baseresultdir), \
-					'Should have run base() before running netlc()!'
+			assert os.path.exists(self.baseresultdir),'Should have run base() before running netlc()!'
 			#print('plotting raw_lc_with_base.png ...')
 			viewt1=np.max([self.baset1,viewt1])
 			viewt2=np.min([self.baset2,viewt2])
@@ -776,8 +720,7 @@ class GRB:
 			for i in range(14):
 				#data in firt and last two channels of BGO and NaI are not used
 				#ignore 0,1,126,127, notice 2-125
-				cNet=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
 				ymax=totalNet.max()
 				if i<=1:
@@ -788,24 +731,18 @@ class GRB:
 					if NaIplotymax<ymax:
 						NaIplotymax=ymax
 						NaIdetseq=i
-				cRate=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][0] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cRate=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][0] for ch in np.arange(ch1,ch2+1) ])
 				totalRate=np.sum(cRate,axis=0)
 				totalRate=np.concatenate(([totalRate[0]],totalRate))
-				axes[i//2,i%2].plot(self.tbins,totalRate,linestyle='steps',lw=3.0,\
-															color='tab:blue')
-				cBase=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][1] \
-									for ch in np.arange(ch1,ch2+1) ])
+				axes[i//2,i%2].plot(self.tbins,totalRate,linestyle='steps',lw=3.0,color='tab:blue')
+				cBase=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][1] for ch in np.arange(ch1,ch2+1) ])
 				totalBase=np.sum(cBase,axis=0)
 				plottime=self.tbins[:-1]+self.binwidth/2.0
-				axes[i//2,i%2].plot(plottime,totalBase,linestyle='--',lw=4.0,\
-															color='tab:orange')
+				axes[i//2,i%2].plot(plottime,totalBase,linestyle='--',lw=4.0, color='tab:orange')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				axes[i//2,i%2].tick_params(labelsize=25)
-				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-														transAxes,fontsize=25)
-			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
-												 rotation='vertical',fontsize=30)
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
 			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)			
 			plt.savefig(self.resultdir+'/raw_lc_with_base.png')
@@ -815,12 +752,10 @@ class GRB:
 			#print('plotting net_lc.png ...')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=False)
 			for i in range(14):
-				cNet=np.array([f['/'+Det[i]+'/ch'+str(ch)][()][2] \
-									for ch in np.arange(ch1,ch2+1) ])
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
 				totalNet=np.concatenate(([totalNet[0]],totalNet))
-				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',lw=3.0,\
-															color='tab:blue')
+				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',lw=3.0,color='tab:blue')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				if i<=1:
 					axes[i//2,i%2].set_ylim([0,BGOplotymax])
@@ -828,15 +763,11 @@ class GRB:
 					axes[i//2,i%2].set_ylim([0,NaIplotymax])
 				axes[i//2,i%2].tick_params(labelsize=25)
 				if i==BGOdetseq:
-					axes[i//2,i%2].text(0.7,0.85,'Brightest BGO',transform=\
-							axes[i//2,i%2].transAxes,color='red',fontsize=25)
+					axes[i//2,i%2].text(0.7,0.85,'Brightest BGO',transform=axes[i//2,i%2].transAxes,color='red',fontsize=25)
 				elif i==NaIdetseq:
-					axes[i//2,i%2].text(0.7,0.85,'Brightest NaI',transform=\
-							axes[i//2,i%2].transAxes,color='red',fontsize=25)
-				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].\
-														transAxes,fontsize=25)
-			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',\
-												 rotation='vertical',fontsize=30)
+					axes[i//2,i%2].text(0.7,0.85,'Brightest NaI',transform=axes[i//2,i%2].transAxes,color='red',fontsize=25)
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+			fig.text(0.07, 0.5, 'Count rate (count/s)', ha='center', va='center',rotation='vertical',fontsize=30)
 			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
 			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)			
 			plt.savefig(self.resultdir+'/net_lc.png')
@@ -846,22 +777,17 @@ class GRB:
 
 	def countmap(self,viewt1=-50,viewt2=300):
 		if not os.path.exists(self.resultdir+'/net_countmap.png'):
-			assert os.path.exists(self.baseresultdir), \
-					'Should have run base() before running countmap()!'
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running countmap()!'
 			viewt1=np.max([self.baset1,viewt1])
 			viewt2=np.min([self.baset2,viewt2])
 			#print('plotting rate_countmap.png ...')
-			#plot_countmap(self.bnname,self.resultdir,self.baseresultdir,\
-			#					self.datadir,'rate',self.tbins,viewt1,viewt2)
+			#plot_countmap(self.bnname,self.resultdir,self.baseresultdir,self.datadir,'rate',self.tbins,viewt1,viewt2)
 			#print('plotting base_countmap.png ...')
-			#plot_countmap(self.bnname,self.resultdir,self.baseresultdir,\
-			#					self.datadir,'base',self.tbins,viewt1,viewt2)
+			#plot_countmap(self.bnname,self.resultdir,self.baseresultdir,self.datadir,'base',self.tbins,viewt1,viewt2)
 			#print('plotting net_countmap.png ...')
-			plot_countmap(self.bnname,self.resultdir,self.baseresultdir,\
-								self.datadir,'net',self.tbins,viewt1,viewt2)
+			plot_countmap(self.bnname,self.resultdir,self.baseresultdir,self.datadir,'net',self.tbins,viewt1,viewt2)
 			#print('plotting pois_countmap.png ...')
-			#plot_countmap(self.bnname,self.resultdir,self.baseresultdir,\
-			#					self.datadir,'pois',self.tbins,viewt1,viewt2)
+			#plot_countmap(self.bnname,self.resultdir,self.baseresultdir,self.datadir,'pois',self.tbins,viewt1,viewt2)
 
 	def rsp(self):
 		if not os.path.exists(self.resultdir+'/response_matrix.png'):
@@ -913,34 +839,25 @@ class GRB:
 				y=np.concatenate((emin,[emax[-1]]))
 				X, Y= np.meshgrid(x,y)
 				if i<=1:
-					pcmBGO=axes[i//2,i%2].pcolormesh(X,Y,filled_matrix,norm=\
-							colors.LogNorm(vmin=1E-1, vmax=BGOmaxcolorvalue),\
-																cmap='rainbow')
+					pcmBGO=axes[i//2,i%2].pcolormesh(X,Y,filled_matrix,\
+						norm=colors.LogNorm(vmin=1E-1, vmax=BGOmaxcolorvalue),cmap='rainbow')
 					axes[i//2,i%2].set_xlim([200,4E4])
 					axes[i//2,i%2].set_ylim([200,4E4])
 				else:
-					pcmNaI=axes[i//2,i%2].pcolormesh(X,Y,filled_matrix,norm=\
-							colors.LogNorm(vmin=1E-2, vmax=NaImaxcolorvalue),\
-																cmap='rainbow')
+					pcmNaI=axes[i//2,i%2].pcolormesh(X,Y,filled_matrix,\
+						norm=colors.LogNorm(vmin=1E-2, vmax=NaImaxcolorvalue),cmap='rainbow')
 					axes[i//2,i%2].set_xlim([5,1E4])
 					axes[i//2,i%2].set_ylim([5,1000])
-				axes[i//2,i%2].tick_params(axis='both',top=True,right=True,\
-										length=3,width=1,direction='out',\
-												which='both',labelsize=25)
-				axes[i//2,i%2].text(0.1,0.7,Det[i],transform=\
-										axes[i//2,i%2].transAxes,fontsize=25)
+				axes[i//2,i%2].tick_params(axis='both',top=True,right=True,length=3,width=1,direction='out',which='both',labelsize=25)
+				axes[i//2,i%2].text(0.1,0.7,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 				axes[i//2,i%2].set_xscale('log')
 				axes[i//2,i%2].set_yscale('log')
-			cbarBGO=fig.colorbar(pcmBGO, ax=axes[0,], orientation='vertical',\
-												fraction=0.005, aspect=200/6)
+			cbarBGO=fig.colorbar(pcmBGO, ax=axes[0,], orientation='vertical',fraction=0.005, aspect=200/6)
 			cbarBGO.ax.tick_params(labelsize=25)
-			cbarNaI=fig.colorbar(pcmNaI, ax=axes[1:,], orientation='vertical',\
-													fraction=0.005, aspect=200)
+			cbarNaI=fig.colorbar(pcmNaI, ax=axes[1:,], orientation='vertical',fraction=0.005, aspect=200)
 			cbarNaI.ax.tick_params(labelsize=25)
-			fig.text(0.05, 0.5, 'Measured Energy (KeV)', ha='center',\
-								 va='center', rotation='vertical',fontsize=30)
-			fig.text(0.5, 0.05, 'Incident Energy (keV)', ha='center',\
-													va='center',fontsize=30)
+			fig.text(0.05, 0.5, 'Measured Energy (KeV)', ha='center',va='center', rotation='vertical',fontsize=30)
+			fig.text(0.5, 0.05, 'Incident Energy (keV)', ha='center',va='center',fontsize=30)
 			plt.savefig(self.resultdir+'response_matrix.png')
 			plt.close()
 		
@@ -971,10 +888,8 @@ class GRB:
 					arf[kk]=filled_matrix[:,kk].sum()
 				arf=np.concatenate(([arf[0]],arf))
 				axes[i//2,i%2].plot(x,arf,linestyle='steps',lw=5)
-				axes[i//2,i%2].tick_params(axis='both',top=True,right=True,\
-					length=10,width=1,direction='in',which='both',labelsize=25)
-				axes[i//2,i%2].text(0.7,0.1,Det[i],transform=\
-										axes[i//2,i%2].transAxes,fontsize=25)
+				axes[i//2,i%2].tick_params(axis='both',top=True,right=True,length=10,width=1,direction='in',which='both',labelsize=25)
+				axes[i//2,i%2].text(0.7,0.1,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 				axes[i//2,i%2].set_xscale('log')
 				axes[i//2,i%2].set_yscale('log')
 				if i<=1:
@@ -990,10 +905,8 @@ class GRB:
 					axes[i//2,i%2].yaxis.set_major_locator(ticker.FixedLocator([1,10,100]))
 					axes[i//2,i%2].yaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 					#axes[i//2,i%2].yaxis.set_minor_formatter(ticker.FormatStrFormatter('%d'))				
-			fig.text(0.05, 0.5, 'Effective Area (cm$^2$)', ha='center',\
-								va='center', rotation='vertical',fontsize=30)
-			fig.text(0.5, 0.05, 'Incident Energy (keV)', ha='center',\
-													va='center',fontsize=30)
+			fig.text(0.05, 0.5, 'Effective Area (cm$^2$)', ha='center',va='center', rotation='vertical',fontsize=30)
+			fig.text(0.5, 0.05, 'Incident Energy (keV)', ha='center',va='center',fontsize=30)
 			plt.savefig(self.resultdir+'/effective_area.png')
 			plt.close()
 
@@ -1048,12 +961,9 @@ class GRB:
 			axes[i//2,i%2].set_xscale('log')
 			axes[i//2,i%2].set_yscale('log')
 			axes[i//2,i%2].tick_params(labelsize=25)
-			axes[i//2,i%2].text(0.85,0.85,Det[i],transform=\
-										axes[i//2,i%2].transAxes,fontsize=25)
-		fig.text(0.07, 0.5, 'Rate (count s$^{-1}$ keV$^{-1}$)', ha='center',\
-							va='center', rotation='vertical',fontsize=30)
-		fig.text(0.5, 0.05, 'Energy (keV)', ha='center', va='center',\
-															fontsize=30)	
+			axes[i//2,i%2].text(0.85,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+		fig.text(0.07, 0.5, 'Rate (count s$^{-1}$ keV$^{-1}$)', ha='center',va='center', rotation='vertical',fontsize=30)
+		fig.text(0.5, 0.05, 'Energy (keV)', ha='center', va='center',fontsize=30)	
 		plt.savefig(sliceresultdir+'/PHA_rate_bkg.png')
 		plt.close()
 		f.close()
