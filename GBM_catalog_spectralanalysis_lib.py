@@ -35,11 +35,9 @@ from personal_settings import *
 #databasedir='/home/lang/work/GBM/burstdownload/data/'
 #databasedir='/diskb/Database/Fermi/gbm_burst/data/'
 databasedir=get_databasedir()
-NaI=['n0','n1','n2','n3','n4','n5',\
-	'n6','n7','n8','n9','na','nb']
+NaI=['n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
 BGO=['b0','b1']
-Det=['b0','b1','n0','n1','n2','n3','n4','n5',\
-	'n6','n7','n8','n9','na','nb']
+Det=['b0','b1','n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
 #data in first and last three channels of BGO and NaI are used
 #ignore 0,1,2,125,126,127, notice 3-124
 ch1=3
