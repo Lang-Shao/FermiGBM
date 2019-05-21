@@ -1,5 +1,4 @@
 # General analyses of GBM catalog bursts 
-# last modified: Apr. 29, 2019
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
