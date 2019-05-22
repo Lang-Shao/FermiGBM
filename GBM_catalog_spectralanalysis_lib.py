@@ -1126,13 +1126,62 @@ class deGRB(GRB):
 				f.flush()
 				f.close()
 				
-# check SNR
+				
+# check gaussian distribution for different bin sizes
+	def check_debase_gaussian_net_rate(self,sigma=3,de_binwidth=[1.0,0.1,0.01]):
+		if not os.path.exists(self.resultdir+'/check_debase_gaussian_net_rate_0.png'):
+			assert os.path.exists(self.de_baseresultdir), 'Should have run de_base() before running check_debase_gaussian_net_rate()!'
+			for seq,binwidth in enumerate(de_binwidth):
+				tbins=np.arange(self.de_baset1,self.de_baset2+binwidth,binwidth)
+				f=h5py.File(self.de_baseresultdir+'/base_'+str(seq)+'.h5',mode='r')
+				fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=False,sharey=False)
+				for i in range(14):
+					cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
+					totalNet=np.sum(cNet,axis=0)
+					median=np.median(totalNet)
+					if seq==0:
+						loc,scale=stats.norm.fit(totalNet)
+						Y=stats.norm(loc=loc,scale=scale)
+						#totalNet_median_part=totalNet[(totalNet>Y.interval(norm_pvalue(1))[0]) & (totalNet<Y.interval(norm_pvalue(1))[1])]
+						mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+						myfilter=list(map(operator.not_, mask))
+						totalNet_median_part=totalNet[myfilter]
+						bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/20)
+					else:
+						totalNet_median_part=totalNet[totalNet<5*median]
+						bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/30)
+					histvalue, histbin =np.histogram(totalNet,bins=bins)
+					histvalue=np.concatenate(([histvalue[0]],histvalue))
+					axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',label='Observed net rate, binwidth='+str(binwidth))
+					loc,scale=stats.norm.fit(totalNet_median_part)
+					Y=stats.norm(loc=loc,scale=scale)
+					x=np.linspace(totalNet_median_part.min(),totalNet_median_part.max(),num=100)
+					axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),\
+								label='Gaussian Distribution',\
+								linestyle='--',lw=3.0,color='tab:orange')
+					axes[i//2,i%2].tick_params(labelsize=25)
+					axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+					gaussian_level=Y.interval(norm_pvalue(sigma))
+					#axes[i//2,i%2].axvline(gaussian_level[0],ls='--',lw=2,color='green',label=str(sigma)+'$\sigma$ level')
+					axes[i//2,i%2].axvline(totalNet_median_part.max(),ls='--',lw=2,color='green',label=str(sigma)+'$\sigma$ level')
+					#axes[i//2,i%2].axvline(gaussian_level[1],ls='--',lw=2,color='green')
+					axes[i//2,i%2].axvline(totalNet_median_part.min(),ls='--',lw=2,color='green')
+					if i==1:
+						axes[i//2,i%2].legend(fontsize=20)
+				f.close()
+				fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',rotation='vertical',fontsize=30)
+				fig.text(0.5, 0.05, 'Total net rate (s$^{-1}$; between '+str(self.de_baset1)+'--'+str(self.de_baset2)+'s)',\
+					ha='center', va='center',fontsize=30)					
+				plt.savefig(self.resultdir+'/check_debase_gaussian_net_rate_'+str(seq)+'.png')
+				plt.close()
+		
+				
+# check SNR with different bin sizes
 	def check_debase_snr(self,viewt1=-50,viewt2=300,de_binwidth=[1.0,0.1,0.01]):
 		if not os.path.exists(self.resultdir+'/check_debase_SNR.png'):
 			assert os.path.exists(self.de_baseresultdir), 'Should have run de_base() before running check_debase_snr()!'
 			viewt1=np.max([self.de_baset1,viewt1])
 			viewt2=np.min([self.de_baset2,viewt2])
-			#f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=True)
 			ylim=np.zeros((14,2))
 			my_colors=['black','red','blue','green']
@@ -1143,20 +1192,21 @@ class deGRB(GRB):
 					cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 					totalNet=np.sum(cNet,axis=0)
 					median=np.median(totalNet)
-					totalNet_median_part=totalNet[totalNet<5*median]
+					if seq==0:
+						loc,scale=stats.norm.fit(totalNet)
+						Y=stats.norm(loc=loc,scale=scale)
+						#totalNet_median_part=totalNet[(totalNet>Y.interval(norm_pvalue(1))[0]) & (totalNet<Y.interval(norm_pvalue(1))[1])]
+						mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+						myfilter=list(map(operator.not_, mask))
+						totalNet_median_part=totalNet[myfilter]
+						bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/15)
+					else:
+						totalNet_median_part=totalNet[totalNet<5*median]
 					loc,scale=stats.norm.fit(totalNet_median_part)
-					#Y=stats.norm(loc=loc,scale=scale)
-					#gaussian_level=Y.interval(norm_pvalue(sigma))
 					totalNet=np.concatenate(([totalNet[0]],totalNet))
 					snr=(totalNet-loc)/scale
 					axes[i//2,i%2].plot(tbins,snr,linestyle='steps',lw=1.0,color=my_colors[seq],alpha=0.5,label=str(binwidth))
-					#axes[i//2,i%2].axhline(gaussian_level[1],ls='--',lw=3,\
-					#	color='orange',label=str(sigma)+'$\sigma$ level of gaussian background')
 					axes[i//2,i%2].tick_params(labelsize=25)
-					#axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
-					#axes[i//2,i%2].axhline(y=3,color='orange',ls='--',lw=3,zorder=2,label='SNR=3')
-					#for t in self.tbins[snr>3]:
-					#	axes[i//2,i%2].axvline(x=t,ymin=0.95,color='red',zorder=2)
 					if i==1:
 						axes[i//2,i%2].legend(fontsize=20)
 				f.close()

@@ -29,6 +29,7 @@ def inspect_snr(bnname):
 	grb=deGRB(bnname)
 	grb.de_base()
 	grb.check_debase_snr(viewt1=-1,viewt2=25)
+	grb.check_debase_gaussian_net_rate()
 
 
 def inspect_GRB(bnname):	
