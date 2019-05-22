@@ -229,9 +229,9 @@ def copy_rspI(bnname,det,outfile):
 	os.system('cp '+rspfile+' '+outfile)
 	
 	
-###################	
-# BEGIN CLASS GRB #
-###################
+########################	
+# BEGIN base class GRB #
+########################
 
 class GRB:
 	def __init__(self,bnname):
@@ -288,7 +288,7 @@ class GRB:
 			self.GTI1=np.max(GTI_t1)
 			self.GTI2=np.min(GTI_t2)
 
-	def rawlc(self,viewt1=-50,viewt2=300,binwidth=0.1):		
+	def rawlc(self,viewt1=-50,viewt2=300,binwidth=0.064):		
 		viewt1=np.max([self.GTI1,viewt1])
 		viewt2=np.min([self.GTI2,viewt2])
 		assert viewt1<viewt2, self.bnname+': Inappropriate view times for rawlc!'
@@ -327,7 +327,7 @@ class GRB:
 			plt.savefig(self.resultdir+'/raw_lc.png')
 			plt.close()
 
-	def base(self,baset1=-50,baset2=300,binwidth=0.1):
+	def base(self,baset1=-50,baset2=300,binwidth=0.064):
 		self.baset1=np.max([self.GTI1,baset1])
 		self.baset2=np.min([self.GTI2,baset2])
 		self.binwidth=binwidth
@@ -336,7 +336,6 @@ class GRB:
 		if not os.path.exists(self.baseresultdir):
 			#print('creating baseline in '+self.baseresultdir+' ...')
 			os.makedirs(self.baseresultdir)
-			expected_pvalue = norm_pvalue()
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='w')
 			for i in range(14):
 				grp=f.create_group(Det[i])
@@ -377,7 +376,6 @@ class GRB:
 		self.plotbasedir=self.resultdir+'/plotbase/'
 		if not os.path.exists(self.plotbasedir):
 			assert os.path.exists(self.baseresultdir), 'Should have run base() before running plotbase()!'
-			#print('plotting base ...')
 			os.makedirs(self.plotbasedir)
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			for ch in range(128):
@@ -402,8 +400,7 @@ class GRB:
 
 	def check_gaussian_total_rate(self):
 		if not os.path.exists(self.resultdir+'/check_gaussian_total_rate.png'):
-			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
-			#print('plotting check_gaussian_total_rate.png ...')
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running check_gaussian_total_rate()!'
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=False,sharey=False)
 			for i in range(14):
@@ -436,8 +433,7 @@ class GRB:
 
 	def check_gaussian_net_rate(self,sigma=3):
 		if not os.path.exists(self.resultdir+'/check_gaussian_net_rate.png'):
-			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
-			#print('plotting check_gaussian_total_rate.png ...')
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running check_gaussian_net_rate()!'
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=False,sharey=False)
 			for i in range(14):
@@ -455,12 +451,8 @@ class GRB:
 				axes[i//2,i%2].plot(x,Y.pdf(x)*netRate.size*(bins[1]-bins[0]),\
 								label='Gaussian Distribution',\
 								linestyle='--',lw=3.0,color='tab:orange')
-				#axes[i//2,i%2].set_xlim([0.1*median,2*median])
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.5,0.8,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
-				#axes[i//2,i%2].axvline(median,lw=1,ls='--',color='k',zorder=2)
-				#axes[i//2,i%2].axvline(netRate_median_part.min(),lw=1,color='k',alpha=0.3)
-				#axes[i//2,i%2].axvline(netRate_median_part.max(),lw=1,color='k',alpha=0.3)
 				gaussian_level=Y.interval(norm_pvalue(sigma))
 				axes[i//2,i%2].axvline(gaussian_level[0],ls='--',lw=2,color='green',label=str(sigma)+'$\sigma$ level')
 				axes[i//2,i%2].axvline(gaussian_level[1],ls='--',lw=2,color='green')
@@ -475,8 +467,7 @@ class GRB:
 
 	def plot_gaussian_level_over_net_lc(self,viewt1=-50,viewt2=300,sigma=3):
 		if not os.path.exists(self.resultdir+'/gaussian_level_over_net_lc.png'):
-			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
-			#print('plotting check_gaussian_total_rate.png ...')
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running plot_gaussian_level_over_net_lc()!'
 			viewt1=np.max([self.baset1,viewt1])
 			viewt2=np.min([self.baset2,viewt2])
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
@@ -514,12 +505,50 @@ class GRB:
 			plt.savefig(self.resultdir+'/gaussian_level_over_net_lc.png')
 			plt.close()
 			f.close()
+			
+			
+# check SNR
+	def check_snr(self,viewt1=-50,viewt2=300):
+		if not os.path.exists(self.resultdir+'/check_SNR.png'):
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running check_snr()!'
+			viewt1=np.max([self.baset1,viewt1])
+			viewt2=np.min([self.baset2,viewt2])
+			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
+			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=False)
+			ylim=np.zeros((14,2))
+			for i in range(14):
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
+				totalNet=np.sum(cNet,axis=0)
+				median=np.median(totalNet)
+				totalNet_median_part=totalNet[totalNet<5*median]
+				loc,scale=stats.norm.fit(totalNet_median_part)
+				#Y=stats.norm(loc=loc,scale=scale)
+				#gaussian_level=Y.interval(norm_pvalue(sigma))
+				totalNet=np.concatenate(([totalNet[0]],totalNet))
+				snr=(totalNet-loc)/scale
+				axes[i//2,i%2].plot(self.tbins,snr,linestyle='steps',lw=3.0,color='tab:blue')
+				#axes[i//2,i%2].axhline(gaussian_level[1],ls='--',lw=3,\
+				#	color='orange',label=str(sigma)+'$\sigma$ level of gaussian background')
+				axes[i//2,i%2].tick_params(labelsize=25)
+				axes[i//2,i%2].set_xlim([viewt1,viewt2])
+				axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+				axes[i//2,i%2].axhline(y=3,color='orange',ls='--',lw=3,zorder=2,label='SNR=3')
+				for t in self.tbins[snr>3]:
+					axes[i//2,i%2].axvline(x=t,ymin=0.95,color='red',zorder=2)
+				if i==1:
+					axes[i//2,i%2].legend(fontsize=20)
+			fig.text(0.07, 0.5, 'Signal-to-noise ratio', ha='center', va='center',rotation='vertical',fontsize=30)
+			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
+			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)			
+			plt.savefig(self.resultdir+'/check_SNR.png')
+			plt.close()
+			f.close()			
+			
 
 # check pulse based on plot_gauss_level_over_net_lc above
 	def check_pulse(self,viewt1=-50,viewt2=300,sigma=3):
 		if not os.path.exists(self.resultdir+'/check_pulse.png'):
-			assert os.path.exists(self.baseresultdir), 'Should have run base() before running base_stats()!'
-			#print('plotting check_gaussian_total_rate.png ...')
+			assert os.path.exists(self.baseresultdir), 'Should have run base() before running check_pulse()!'
 			viewt1=np.max([self.baset1,viewt1])
 			viewt2=np.min([self.baset2,viewt2])
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
@@ -1044,3 +1073,98 @@ class GRB:
 	def removebase(self):
 		os.system('rm -rf '+self.baseresultdir)
 	
+
+#############################	
+# BEGIN derived class deGRB #
+#############################
+# for checking snr with different binwidth in baseline
+class deGRB(GRB):
+		
+	def de_base(self,de_baset1=-50,de_baset2=300,de_binwidth=[1.0,0.1,0.01]):
+		self.de_baseresultdir=self.baseresultdir+'/de_base/'
+		self.de_baset1=np.max([self.GTI1,de_baset1])
+		self.de_baset2=np.min([self.GTI2,de_baset2])
+
+		assert self.de_baset1<self.de_baset2, self.bnname+': Inappropriate base times!'
+		if not os.path.exists(self.de_baseresultdir):
+			os.makedirs(self.de_baseresultdir)
+			for seq,binwidth in enumerate(de_binwidth):
+				tbins=np.arange(self.de_baset1,self.de_baset2+binwidth,binwidth)
+				f=h5py.File(self.de_baseresultdir+'/base_'+str(seq)+'.h5',mode='w')
+				for i in range(14):
+					grp=f.create_group(Det[i])
+					ttefile=glob(self.datadir+'/'+'glg_tte_'+Det[i]+'_'+self.bnname+'_v*.fit')
+					hdu=fits.open(ttefile[0])	
+					trigtime=hdu['Primary'].header['TRIGTIME']
+					data=hdu['EVENTS'].data
+					timedata=data.field(0)-trigtime
+					chdata=data.field(1)
+					for ch in range(128):
+						time_selected=timedata[chdata==ch]
+						histvalue, histbin=np.histogram(time_selected,bins=tbins)
+						rate=histvalue/binwidth
+						r.assign('rrate',rate) 
+						r("y=matrix(rrate,nrow=1)")
+						#fillPeak_hwi=str(int(40/binwidth))
+						#fillPeak_int=str(int(len(rate)/10))
+						#fillPeak_lam=str(int(0.708711*(len(rate))**0.28228+0.27114))
+						#r("rbase=baseline(y,lam = "+fillPeak_lam+", hwi="\
+						#					+fillPeak_hwi+", it=10, int ="\
+						#					+fillPeak_int+", method='fillPeaks')")
+						fillPeak_hwi=str(int(5/binwidth))
+						fillPeak_int=str(int(len(rate)/10))
+						r("rbase=baseline(y,lam = 6, hwi="+fillPeak_hwi+", it=10,int ="+fillPeak_int+", method='fillPeaks')")
+						r("bs=getBaseline(rbase)")
+						r("cs=getCorrected(rbase)")
+						bs=r('bs')[0]
+						cs=r('cs')[0]
+						# correct negative base to 0 and recover the net value to original rate
+						corrections_index= (bs<0)
+						bs[corrections_index]=0
+						cs[corrections_index]=rate[corrections_index]
+						f['/'+Det[i]+'/ch'+str(ch)]=np.array([rate,bs,cs])
+				f.flush()
+				f.close()
+				
+# check SNR
+	def check_debase_snr(self,viewt1=-50,viewt2=300,de_binwidth=[1.0,0.1,0.01]):
+		if not os.path.exists(self.resultdir+'/check_debase_SNR.png'):
+			assert os.path.exists(self.de_baseresultdir), 'Should have run de_base() before running check_debase_snr()!'
+			viewt1=np.max([self.de_baset1,viewt1])
+			viewt2=np.min([self.de_baset2,viewt2])
+			#f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
+			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=True)
+			ylim=np.zeros((14,2))
+			my_colors=['black','red','blue','green']
+			for seq,binwidth in enumerate(de_binwidth):
+				tbins=np.arange(self.de_baset1,self.de_baset2+binwidth,binwidth)
+				f=h5py.File(self.de_baseresultdir+'/base_'+str(seq)+'.h5',mode='r')
+				for i in range(14):
+					cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
+					totalNet=np.sum(cNet,axis=0)
+					median=np.median(totalNet)
+					totalNet_median_part=totalNet[totalNet<5*median]
+					loc,scale=stats.norm.fit(totalNet_median_part)
+					#Y=stats.norm(loc=loc,scale=scale)
+					#gaussian_level=Y.interval(norm_pvalue(sigma))
+					totalNet=np.concatenate(([totalNet[0]],totalNet))
+					snr=(totalNet-loc)/scale
+					axes[i//2,i%2].plot(tbins,snr,linestyle='steps',lw=1.0,color=my_colors[seq],alpha=0.5,label=str(binwidth))
+					#axes[i//2,i%2].axhline(gaussian_level[1],ls='--',lw=3,\
+					#	color='orange',label=str(sigma)+'$\sigma$ level of gaussian background')
+					axes[i//2,i%2].tick_params(labelsize=25)
+					#axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
+					#axes[i//2,i%2].axhline(y=3,color='orange',ls='--',lw=3,zorder=2,label='SNR=3')
+					#for t in self.tbins[snr>3]:
+					#	axes[i//2,i%2].axvline(x=t,ymin=0.95,color='red',zorder=2)
+					if i==1:
+						axes[i//2,i%2].legend(fontsize=20)
+				f.close()
+			axes[0,0].set_xlim([viewt1,viewt2])
+			#axes[0,0].set_ylim([-1,4])
+			fig.text(0.07, 0.5, 'Signal-to-noise ratio', ha='center', va='center',rotation='vertical',fontsize=30)
+			fig.text(0.5, 0.05, 'Time (s)', ha='center', va='center',fontsize=30)		
+			fig.text(0.5, 0.92, self.bnname, ha='center', va='center',fontsize=30)			
+			plt.savefig(self.resultdir+'/check_debase_SNR.png')
+			plt.close()
+					

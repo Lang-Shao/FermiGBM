@@ -24,6 +24,13 @@ def main():
 		inspect_GRB(bn)
 	'''
 
+def inspect_snr(bnname):
+	print('Processing: '+bnname)
+	grb=deGRB(bnname)
+	grb.de_base()
+	grb.check_debase_snr(viewt1=-1,viewt2=25)
+
+
 def inspect_GRB(bnname):	
 	print('Processing: '+bnname)
 	grb=GRB(bnname)
@@ -35,6 +42,7 @@ def inspect_GRB(bnname):
 		grb.plot_gaussian_level_over_net_lc()
 		grb.check_pulse()
 		grb.countmap()
+		grb.check_snr()
 		#remove basedir to save disk space
 		#grb.removebase()
 		
@@ -62,4 +70,5 @@ def inspect_GRB(bnname):
 # Always run this Main part #
 if __name__ == '__main__':
 	#main()
-	inspect_GRB('bn190114873')
+	#inspect_GRB('bn190114873')
+	inspect_snr('bn190114873')
