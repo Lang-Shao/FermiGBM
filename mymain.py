@@ -28,7 +28,7 @@ def inspect_snr(bnname):
 	print('Processing: '+bnname)
 	grb=deGRB(bnname)
 	grb.de_base()
-	grb.check_debase_snr(viewt1=-1,viewt2=25)
+	grb.check_debase_snr(viewt1=-30,viewt2=300)
 	grb.check_debase_gaussian_net_rate()
 
 
@@ -71,5 +71,5 @@ def inspect_GRB(bnname):
 # Always run this Main part #
 if __name__ == '__main__':
 	#main()
-	#inspect_GRB('bn190114873')
-	inspect_snr('bn190114873')
+	inspect_GRB('bn190114873')
+	#inspect_snr('bn190114873')

@@ -437,19 +437,21 @@ class GRB:
 			f=h5py.File(self.baseresultdir+'/base.h5',mode='r')
 			fig, axes= plt.subplots(7,2,figsize=(32, 20),sharex=False,sharey=False)
 			for i in range(14):
-				cRate=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
-				netRate=np.sum(cRate,axis=0)
-				median=np.median(netRate)
-				netRate_median_part=netRate[netRate<5*median]
-				bins=np.arange(netRate.min(),netRate.max(),(netRate_median_part.max()-netRate_median_part.min())/30)
-				histvalue, histbin =np.histogram(netRate,bins=bins)
+				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
+				totalNet=np.sum(cNet,axis=0)
+				#clip the outliers and fit the central median part
+				mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+				myfilter=list(map(operator.not_, mask))
+				totalNet_median_part=totalNet[myfilter]
+				bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/25)
+				histvalue, histbin =np.histogram(totalNet,bins=bins)
 				histvalue=np.concatenate(([histvalue[0]],histvalue))
 				axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',label='Observed net rate')
-				loc,scale=stats.norm.fit(netRate_median_part)
+				loc,scale=stats.norm.fit(totalNet_median_part)
 				Y=stats.norm(loc=loc,scale=scale)
-				x=np.linspace(netRate_median_part.min(),netRate_median_part.max(),num=100)
-				axes[i//2,i%2].plot(x,Y.pdf(x)*netRate.size*(bins[1]-bins[0]),\
-								label='Gaussian Distribution',\
+				x=np.linspace(totalNet_median_part.min(),totalNet_median_part.max(),num=100)
+				axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),\
+								label='Gaussian Distribution within clipped region',\
 								linestyle='--',lw=3.0,color='tab:orange')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.5,0.8,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
@@ -476,8 +478,10 @@ class GRB:
 			for i in range(14):
 				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
-				median=np.median(totalNet)
-				totalNet_median_part=totalNet[totalNet<5*median]
+				#clip the outliers and fit the central median part
+				mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+				myfilter=list(map(operator.not_, mask))
+				totalNet_median_part=totalNet[myfilter]
 				loc,scale=stats.norm.fit(totalNet_median_part)
 				Y=stats.norm(loc=loc,scale=scale)
 				gaussian_level=Y.interval(norm_pvalue(sigma))
@@ -562,8 +566,10 @@ class GRB:
 			for i in range(14):
 				cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 				totalNet=np.sum(cNet,axis=0)
-				median=np.median(totalNet)
-				totalNet_median_part=totalNet[totalNet<5*median]
+				#clip the outliers and fit the central median part
+				mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+				myfilter=list(map(operator.not_, mask))
+				totalNet_median_part=totalNet[myfilter]
 				loc,scale=stats.norm.fit(totalNet_median_part)
 				Y=stats.norm(loc=loc,scale=scale)
 				gaussian_level=Y.interval(norm_pvalue(sigma))
@@ -1138,18 +1144,13 @@ class deGRB(GRB):
 				for i in range(14):
 					cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 					totalNet=np.sum(cNet,axis=0)
-					median=np.median(totalNet)
-					if seq==0:
-						loc,scale=stats.norm.fit(totalNet)
-						Y=stats.norm(loc=loc,scale=scale)
-						#totalNet_median_part=totalNet[(totalNet>Y.interval(norm_pvalue(1))[0]) & (totalNet<Y.interval(norm_pvalue(1))[1])]
-						mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
-						myfilter=list(map(operator.not_, mask))
-						totalNet_median_part=totalNet[myfilter]
-						bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/20)
-					else:
-						totalNet_median_part=totalNet[totalNet<5*median]
-						bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/30)
+					#clip the outliers and fit the central median part
+					mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+					myfilter=list(map(operator.not_, mask))
+					totalNet_median_part=totalNet[myfilter]
+					bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/25)
+					#totalNet_median_part=totalNet[totalNet<5*median]
+					#bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/30)
 					histvalue, histbin =np.histogram(totalNet,bins=bins)
 					histvalue=np.concatenate(([histvalue[0]],histvalue))
 					axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',label='Observed net rate, binwidth='+str(binwidth))
@@ -1163,7 +1164,7 @@ class deGRB(GRB):
 					axes[i//2,i%2].text(0.05,0.85,Det[i],transform=axes[i//2,i%2].transAxes,fontsize=25)
 					gaussian_level=Y.interval(norm_pvalue(sigma))
 					#axes[i//2,i%2].axvline(gaussian_level[0],ls='--',lw=2,color='green',label=str(sigma)+'$\sigma$ level')
-					axes[i//2,i%2].axvline(totalNet_median_part.max(),ls='--',lw=2,color='green',label=str(sigma)+'$\sigma$ level')
+					axes[i//2,i%2].axvline(totalNet_median_part.max(),ls='--',lw=2,color='green',label='region for gaussing fitting')
 					#axes[i//2,i%2].axvline(gaussian_level[1],ls='--',lw=2,color='green')
 					axes[i//2,i%2].axvline(totalNet_median_part.min(),ls='--',lw=2,color='green')
 					if i==1:
@@ -1191,17 +1192,10 @@ class deGRB(GRB):
 				for i in range(14):
 					cNet=np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] for ch in np.arange(ch1,ch2+1) ])
 					totalNet=np.sum(cNet,axis=0)
-					median=np.median(totalNet)
-					if seq==0:
-						loc,scale=stats.norm.fit(totalNet)
-						Y=stats.norm(loc=loc,scale=scale)
-						#totalNet_median_part=totalNet[(totalNet>Y.interval(norm_pvalue(1))[0]) & (totalNet<Y.interval(norm_pvalue(1))[1])]
-						mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
-						myfilter=list(map(operator.not_, mask))
-						totalNet_median_part=totalNet[myfilter]
-						bins=np.arange(totalNet.min(),totalNet.max(),(totalNet_median_part.max()-totalNet_median_part.min())/15)
-					else:
-						totalNet_median_part=totalNet[totalNet<5*median]
+					#clip the outliers and fit the central median part
+					mask=sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+					myfilter=list(map(operator.not_, mask))
+					totalNet_median_part=totalNet[myfilter]
 					loc,scale=stats.norm.fit(totalNet_median_part)
 					totalNet=np.concatenate(([totalNet[0]],totalNet))
 					snr=(totalNet-loc)/scale
