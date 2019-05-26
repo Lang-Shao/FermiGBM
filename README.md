@@ -1,5 +1,4 @@
 Fermi GBM burst catalog
-2
 
 Working on:
 
