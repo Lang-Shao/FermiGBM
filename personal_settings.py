@@ -15,6 +15,6 @@ def get_dailydatabasedir():
 	return dailydatabasedir
 
 def get_ncore():
-	ncore=3	
-	#ncore=80
+	#ncore=3	
+	ncore=80
 	return ncore

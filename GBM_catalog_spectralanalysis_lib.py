@@ -10,6 +10,7 @@ import os
 import sys
 import operator
 import h5py
+import itertools
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -477,6 +478,12 @@ class GBM:
 								labels=[1,0,0,1], color='#d9d6c3',size=20)
 			map.drawmapboundary(fill_color='#f6f5ec')
 
+
+
+##################
+# SOME FUNCTIONS #
+##################
+
 def open_fit(file_link):
 	f = fits.open(file_link)
 	time = f[1].data.field(0)
@@ -500,9 +507,20 @@ def find_right_list(file_link,met):
 	pos = np.array([pos_x[index][0],pos_y[index][0],pos_z[index][0]])
 	return qsj,pos
 
-##################
-# SOME FUNCTIONS #
-##################
+def NaI_separation():
+	n0 = SkyCoord(45.89, 90-20.58, unit='deg')
+	n1 = SkyCoord(45.11, 90-45.31, unit='deg')
+	n2 = SkyCoord(58.44, 90-90.21, unit='deg')
+	n3 = SkyCoord(314.87, 90-45.24, unit='deg')
+	n4 = SkyCoord(303.15, 90-90.27, unit='deg')
+	n5 = SkyCoord(3.35, 90-89.97, unit='deg')
+	n6 = SkyCoord(224.93, 90-20.43, unit='deg')
+	n7 = SkyCoord(224.62, 90-46.18, unit='deg')
+	n8 = SkyCoord(236.61, 90-89.97, unit='deg')
+	n9 = SkyCoord(135.19, 90-45.55, unit='deg')
+	na = SkyCoord(123.73, 90-90.42, unit='deg')
+	nb = SkyCoord(183.74, 90-90.32, unit='deg')
+	
 
 def met2utc_shao(myMET):
 	UTC0 = Time('2001-01-01',format='iso',scale='utc')
@@ -549,7 +567,26 @@ def met2utc_shao(myMET):
 		print('Check your input format!')
 		return None
 
+Det_pointing=[SkyCoord(45.89, 90-20.58, unit='deg'),
+			SkyCoord(45.11, 90-45.31, unit='deg'),
+			SkyCoord(58.44, 90-90.21, unit='deg'),
+			SkyCoord(314.87, 90-45.24, unit='deg'),
+			SkyCoord(303.15, 90-90.27, unit='deg'),
+			SkyCoord(3.35, 90-89.97, unit='deg'),
+			SkyCoord(224.93, 90-20.43, unit='deg'),
+			SkyCoord(224.62, 90-46.18, unit='deg'),
+			SkyCoord(236.61, 90-89.97, unit='deg'),
+			SkyCoord(135.19, 90-45.55, unit='deg'),
+			SkyCoord(123.73, 90-90.42, unit='deg'),
+			SkyCoord(183.74, 90-90.32, unit='deg')]
 
+def if_closeDet(det_list):
+	test = False
+	for det1, det2 in itertools.combinations(det_list,2):
+		if Det_pointing[det1].separation(Det_pointing[det2]).deg < 60.0:
+			test = True
+			break
+	return test
 
 # https://en.wikipedia.org/wiki/Normal_distribution
 # https://en.wikipedia.org/wiki/Poisson_distribution
@@ -1179,7 +1216,7 @@ class GRB:
 			fig, axes = plt.subplots(7,2,figsize=(32, 20),
 									sharex=True,sharey=False)
 			ylim = np.zeros((14,2))
-			positiveIndex = []
+			positiveIndex_2d = [0]*12
 			negativeIndex = []
 			goodIndex = []
 			badIndex = []
@@ -1198,14 +1235,28 @@ class GRB:
 				totalNet = np.concatenate(([totalNet[0]],totalNet))
 				# search NaI detectors for tbins indice over and under gaussian level
 				if i >= 2:
-					positiveIndex.extend(np.where(totalNet>gaussian_level[1])[0])
+					#positiveIndex.extend(np.where(totalNet>gaussian_level[1])[0])
+					positiveIndex_2d[i-2] = np.where(totalNet>gaussian_level[1])[0]
 					negativeIndex.extend(np.where(totalNet<gaussian_level[0])[0])
-			# search tbin where at lease 3 detectctors have the signal
+			# search tbin where at lease 2 detectctors have the signal
 			# stored in goodIndex
+			positiveIndex=list(np.concatenate(positiveIndex_2d,axis=0).flatten())
 			positiveIndex_set = set(positiveIndex)
 			for seq in positiveIndex_set:
-				if positiveIndex.count(seq) >= 3:
+				if positiveIndex.count(seq) >= 2:
 					goodIndex.extend([seq])
+			'''
+			goodIndex_2d = [0]*len(goodIndex)
+			for seq, index in enumerate(goodIndex):
+				goodIndex_2d[seq] = []
+				for i in range(12):
+					if index in positiveIndex_2d[i]:
+						goodIndex_2d[seq].extend([i])
+			for seq, index in enumerate(goodIndex):
+				if not if_closeDet(goodIndex_2d[seq]):
+					goodIndex.pop(seq)
+			'''
+				
 			# search tbins where at least 3 NaIs have an erroneous underflow
 			# stored in badIndex
 			negativeIndex_set = set(negativeIndex)
