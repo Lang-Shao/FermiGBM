@@ -45,12 +45,14 @@ def inspect_GRB(bnname):
 		grb.plot_gaussian_level_over_net_lc()
 		grb.check_pulse()
 		grb.countmap()
-		grb.check_snr()
-		grb.skymap()
+		
+		
 		
 
 		
 		#currently not useful
+		#grb.check_snr()
+		#grb.skymap()
 		#grb.plotbase()
 		#grb.check_gaussian_total_rate()
 		#grb.check_poisson_rate()

@@ -1,0 +1,5 @@
+***ERROR:  check if glg_poshist_all_090626 is available***
+Processing: bn110629174
+***ERROR:  check if glg_poshist_all_081024 is available***
+Processing: bn110709463
+***ERROR:  check if glg_poshist_all_110613 is available***
