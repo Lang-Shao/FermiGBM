@@ -3,6 +3,7 @@ matplotlib.use('Agg')
 from GBM_catalog_spectralanalysis_lib import *
 
 def main():
+
 	fermigbrst = query_fermigbrst()
 	df = pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
@@ -45,6 +46,7 @@ def inspect_GRB(bnname):
 		grb.check_pulse()
 		grb.countmap()
 		grb.check_snr()
+		grb.skymap()
 		
 
 		
@@ -76,4 +78,4 @@ def inspect_GRB(bnname):
 if __name__ == '__main__':
 	#main()
 	inspect_GRB('bn190114873')
-	inspect_snr('bn190114873')
+	#inspect_snr('bn190114873')
