@@ -48,7 +48,6 @@ Det = ['b0','b1','n0','n1','n2','n3','n4','n5','n6','n7','n8','n9','na','nb']
 ch1 = 3
 ch2 = 124
 ncore = get_ncore()
-#ncore=2
 
 
 ########################
@@ -507,21 +506,6 @@ def find_right_list(file_link,met):
 	pos = np.array([pos_x[index][0],pos_y[index][0],pos_z[index][0]])
 	return qsj,pos
 
-def NaI_separation():
-	n0 = SkyCoord(45.89, 90-20.58, unit='deg')
-	n1 = SkyCoord(45.11, 90-45.31, unit='deg')
-	n2 = SkyCoord(58.44, 90-90.21, unit='deg')
-	n3 = SkyCoord(314.87, 90-45.24, unit='deg')
-	n4 = SkyCoord(303.15, 90-90.27, unit='deg')
-	n5 = SkyCoord(3.35, 90-89.97, unit='deg')
-	n6 = SkyCoord(224.93, 90-20.43, unit='deg')
-	n7 = SkyCoord(224.62, 90-46.18, unit='deg')
-	n8 = SkyCoord(236.61, 90-89.97, unit='deg')
-	n9 = SkyCoord(135.19, 90-45.55, unit='deg')
-	na = SkyCoord(123.73, 90-90.42, unit='deg')
-	nb = SkyCoord(183.74, 90-90.32, unit='deg')
-	
-
 def met2utc_shao(myMET):
 	UTC0 = Time('2001-01-01',format='iso',scale='utc')
 	if isinstance(myMET,(list,tuple,np.ndarray)):
@@ -581,10 +565,17 @@ Det_pointing=[SkyCoord(45.89, 90-20.58, unit='deg'),
 			SkyCoord(183.74, 90-90.32, unit='deg')]
 
 def if_closeDet(det_list):
+	"""Check at least three detectors are closely related with each other
+	"""
 	test = False
-	for det1, det2 in itertools.combinations(det_list,2):
-		if Det_pointing[det1].separation(Det_pointing[det2]).deg < 60.0:
-			test = True
+	for det3_1, det3_2, det3_3 in itertools.combinations(det_list,3):
+		inner_test = True		
+		for det1, det2 in itertools.combinations([det3_1, det3_2, det3_3],2):
+			if Det_pointing[det1].separation(Det_pointing[det2]).deg > 60.0:
+				inner_test = False
+				break			
+		if inner_test:
+			test = True			
 			break
 	return test
 
@@ -787,8 +778,6 @@ def copy_rspI(bnname,det,outfile):
 class GRB:
 	def __init__(self,bnname):
 		self.bnname = bnname
-		resultdir = os.getcwd()+'/results/'
-		self.resultdir = resultdir+'/'+bnname+'/'
 		shortyear = self.bnname[2:4]
 		fullyear = '20'+shortyear
 		self.datadir = databasedir+'/'+fullyear+'/'+self.bnname+'/'
@@ -803,7 +792,17 @@ class GRB:
 				event = hdu['EVENTS'].data.field(0)
 				if len(event) < 10:
 					self.dataready = False
-		if self.dataready:
+		if self.dataready:	
+			self.baset1 = None
+			self.baset2 = None
+			self.binwidth = None
+			self.tbins = None
+			self.baseresultdir = None
+			self.phaIresultdir = None
+			self.GTI1 = None
+			self.GTI2 = None
+			resultdir = os.getcwd()+'/results/'
+			self.resultdir = resultdir+'/'+bnname+'/'
 			if not os.path.exists(resultdir):
 				os.makedirs(resultdir)
 			if not os.path.exists(self.resultdir):
@@ -1238,14 +1237,14 @@ class GRB:
 					#positiveIndex.extend(np.where(totalNet>gaussian_level[1])[0])
 					positiveIndex_2d[i-2] = np.where(totalNet>gaussian_level[1])[0]
 					negativeIndex.extend(np.where(totalNet<gaussian_level[0])[0])
-			# search tbin where at lease 2 detectctors have the signal
+			# search tbin where at lease 3 detectctors have the signal
 			# stored in goodIndex
 			positiveIndex=list(np.concatenate(positiveIndex_2d,axis=0).flatten())
 			positiveIndex_set = set(positiveIndex)
 			for seq in positiveIndex_set:
-				if positiveIndex.count(seq) >= 2:
+				if positiveIndex.count(seq) >= 3:
 					goodIndex.extend([seq])
-			'''
+			# check at least 2 detectors are closely related
 			goodIndex_2d = [0]*len(goodIndex)
 			for seq, index in enumerate(goodIndex):
 				goodIndex_2d[seq] = []
@@ -1255,8 +1254,6 @@ class GRB:
 			for seq, index in enumerate(goodIndex):
 				if not if_closeDet(goodIndex_2d[seq]):
 					goodIndex.pop(seq)
-			'''
-				
 			# search tbins where at least 3 NaIs have an erroneous underflow
 			# stored in badIndex
 			negativeIndex_set = set(negativeIndex)
@@ -1268,7 +1265,7 @@ class GRB:
 				for kk in range(1,round(0.5/self.binwidth)):
 					if element+kk in goodIndex:
 						goodIndex.remove(element+kk)
-			#make plots												
+			#make plots											
 			for i in range(14):
 				cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
 							for ch in np.arange(ch1,ch2+1) ])

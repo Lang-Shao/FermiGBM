@@ -69,7 +69,7 @@ def inspect_GRB(bnname):
 		'''
 		
 		#remove basedir to save disk space
-		grb.removebase()
+		#grb.removebase()
 	else:
 		if not os.path.exists(badsampledir+'/'+bnname+'.txt'):
 			with open(badsampledir+'/'+bnname+'.txt','w') as f:
@@ -78,6 +78,6 @@ def inspect_GRB(bnname):
 
 # Always run this Main part #
 if __name__ == '__main__':
-	main()
-	#inspect_GRB('bn190114873')
+	#main()
+	inspect_GRB('bn190114873')
 	#inspect_snr('bn190114873')
