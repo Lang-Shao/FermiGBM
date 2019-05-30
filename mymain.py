@@ -1,14 +1,12 @@
+from GBM_catalog_spectralanalysis_lib import *
 import matplotlib
 matplotlib.use('Agg')
-from GBM_catalog_spectralanalysis_lib import *
 
 def main():
-
 	fermigbrst = query_fermigbrst()
 	df = pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
 	print(trigger_name)
-	
 	global badsampledir
 	cdir = os.getcwd()
 	badsampledir = cdir+'/bad_sample/'
@@ -38,8 +36,6 @@ def inspect_GRB(bnname):
 		grb.check_pulse()
 		grb.countmap()
 
-
-		
 		#currently not useful
 		#grb.check_snr()
 		#grb.skymap()
