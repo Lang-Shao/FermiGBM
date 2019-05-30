@@ -1,25 +1,25 @@
 # General analyses of GBM catalog bursts 
+import warnings
+import os
+import sys
+import operator
+import itertools
+from multiprocessing import Pool
+from collections import OrderedDict
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib import colors
 from matplotlib import ticker
 plt.style.use('seaborn')
-
-import os
-import sys
-import operator
-import h5py
-import itertools
-import pandas as pd
+from mpl_toolkits.basemap import Basemap
 import numpy as np
+from glob import glob
+import h5py
+import pandas as pd
 import seaborn as sns
 #sns.set(style='whitegrid')
-from glob import glob
 from scipy import stats
-from collections import OrderedDict
-from multiprocessing import Pool
-from mpl_toolkits.basemap import Basemap
 import astropy.units as u
 from astropy.io import fits
 from astropy.time import Time
@@ -28,7 +28,6 @@ from astropy.stats import sigma_clip, mad_std
 from astropy.coordinates import get_body_barycentric, cartesian_to_spherical
 from astropy.coordinates import get_sun, SkyCoord, cartesian_to_spherical
 from spherical_geometry.polygon import SphericalPolygon
-import warnings
 from rpy2.rinterface import RRuntimeWarning
 warnings.filterwarnings("ignore", category=RRuntimeWarning)
 import rpy2.robjects as robjects
