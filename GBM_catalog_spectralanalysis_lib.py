@@ -1439,6 +1439,149 @@ class GRB:
 					plt.close()
 			f.close()
 
+# mb=multi binwidth
+	def multi_binwidth_base(self,mb_baset1=-50,mb_baset2=300,mb_binwidth=[1.0,0.1,0.01]):
+		self.mb_baseresultdir = self.baseresultdir+'/mb_base/'
+		self.mb_baset1 = np.max([self.GTI1,mb_baset1])
+		self.mb_baset2 = np.min([self.GTI2,mb_baset2])
+
+		assert self.mb_baset1<self.mb_baset2, self.bnname+': Inappropriate base times!'
+		if not os.path.exists(self.mb_baseresultdir):
+			os.makedirs(self.mb_baseresultdir)
+			for seq,binwidth in enumerate(mb_binwidth):
+				tbins = np.arange(self.mb_baset1,self.mb_baset2+binwidth,binwidth)
+				f = h5py.File(self.mb_baseresultdir+'/base_'+str(seq)+'.h5',mode='w')
+				for i in range(14):
+					grp = f.create_group(Det[i])
+					ttefile = glob(self.datadir+'/'+'glg_tte_'+Det[i]
+										+'_'+self.bnname+'_v*.fit')
+					hdu = fits.open(ttefile[0])	
+					trigtime = hdu['Primary'].header['TRIGTIME']
+					data = hdu['EVENTS'].data
+					timedata = data.field(0)-trigtime
+					chdata = data.field(1)
+					for ch in range(128):
+						time_selected = timedata[chdata==ch]
+						histvalue, histbin = np.histogram(time_selected,bins=tbins)
+						rate = histvalue/binwidth
+						r.assign('rrate',rate) 
+						r("y=matrix(rrate,nrow=1)")
+						fillPeak_hwi = str(int(5/binwidth))
+						fillPeak_int = str(int(len(rate)/10))
+						r("rbase=baseline(y,lam = 6, hwi="+fillPeak_hwi
+								+", it=10,int ="+fillPeak_int
+								+", method='fillPeaks')")
+						r("bs=getBaseline(rbase)")
+						r("cs=getCorrected(rbase)")
+						bs = r('bs')[0]
+						cs = r('cs')[0]
+						# correct negative base to 0 and recover the net value to original rate
+						corrections_index = bs<0
+						bs[corrections_index] = 0
+						cs[corrections_index] = rate[corrections_index]
+						f['/'+Det[i]+'/ch'+str(ch)] = np.array([rate,bs,cs])
+				f.flush()
+				f.close()
+				
+				
+# check gaussian distribution for different bin sizes; mb=multi binwidth
+	def check_mb_base_gaussian_net_rate(self,sigma=3,mb_binwidth=[1.0,0.1,0.01]):
+		if not os.path.exists(self.resultdir+'/check_mb_base_gaussian_net_rate_0.png'):
+			assert os.path.exists(self.mb_baseresultdir), ('Should have run '
+				'multi_binwidth_base() before running check_mb_base_gaussian_net_rate()!')
+			for seq,binwidth in enumerate(mb_binwidth):
+				tbins = np.arange(self.mb_baset1,self.mb_baset2+binwidth,binwidth)
+				f = h5py.File(self.mb_baseresultdir+'/base_'+str(seq)+'.h5',mode='r')
+				fig, axes = plt.subplots(7,2,figsize=(32, 20),
+										sharex=False,sharey=False)
+				for i in range(14):
+					cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
+								for ch in np.arange(ch1,ch2+1) ])
+					totalNet = np.sum(cNet,axis=0)
+					#print('before clip: binwidth',binwidth,'det_',i,stats.shapiro(totalNet))
+					#clip the outliers and fit the central median part
+					mask = sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+					myfilter = list(map(operator.not_, mask))
+					totalNet_median_part = totalNet[myfilter]
+					#print('after clip: binwidth',binwidth,'det_',i,stats.shapiro(totalNet_median_part))
+					bins=np.arange(totalNet.min(),totalNet.max(),
+					(totalNet_median_part.max()-totalNet_median_part.min())/25)
+					histvalue, histbin = np.histogram(totalNet,bins=bins)
+					histvalue = np.concatenate(([histvalue[0]],histvalue))
+					axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',
+						label = 'Observed net rate, binwidth='+str(binwidth))
+					loc,scale = stats.norm.fit(totalNet_median_part)
+					Y = stats.norm(loc=loc,scale=scale)
+					x = np.linspace(totalNet_median_part.min(),
+									totalNet_median_part.max(),num=100)
+					axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),
+								label='Gaussian Distribution',
+								linestyle='--',lw=3.0,color='tab:orange')
+					axes[i//2,i%2].tick_params(labelsize=25)
+					axes[i//2,i%2].text(0.05,0.85,Det[i],fontsize=25,
+									transform=axes[i//2,i%2].transAxes)
+					gaussian_level = Y.interval(norm_pvalue(sigma))
+					axes[i//2,i%2].axvline(totalNet_median_part.max(),ls='--',
+						lw=2,color='green',label='region for gaussing fitting')
+					axes[i//2,i%2].axvline(totalNet_median_part.min(),
+											ls='--',lw=2,color='green')
+					if i ==1 :
+						axes[i//2,i%2].legend(fontsize=20)
+				f.close()
+				fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',
+										rotation='vertical',fontsize=30)
+				fig.text(0.5, 0.05, 'Total net rate (s$^{-1}$; between '
+					+str(self.mb_baset1)+'--'+str(self.mb_baset2)+'s)',
+					ha='center', va='center',fontsize=30)					
+				plt.savefig(self.resultdir+'/check_mb_base_gaussian_net_rate_'
+													+str(seq)+'.png')
+				plt.close()
+		
+				
+# check SNR with different bin sizes; mb=multi binwidth
+	def check_mb_base_snr(self,viewt1=-50,viewt2=300,mb_binwidth=[1.0,0.1,0.01]):
+		if not os.path.exists(self.resultdir+'/check_mb_base_SNR.png'):
+			assert os.path.exists(self.mb_baseresultdir), ('Should have run '
+						'multi_binwidth_base() before running check_debase_snr()!')
+			viewt1 = np.max([self.mb_baset1,viewt1])
+			viewt2 = np.min([self.mb_baset2,viewt2])
+			fig, axes = plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=True)
+			ylim = np.zeros((14,2))
+			my_colors = ['black','red','blue']
+			for seq,binwidth in enumerate(mb_binwidth):
+				tbins = np.arange(self.mb_baset1,self.mb_baset2+binwidth,binwidth)
+				f = h5py.File(self.mb_baseresultdir+'/base_'+str(seq)+'.h5',mode='r')
+				for i in range(14):
+					cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
+									for ch in np.arange(ch1,ch2+1) ])
+					totalNet = np.sum(cNet,axis=0)
+					#clip the outliers and fit the central median part
+					mask = sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+					myfilter = list(map(operator.not_, mask))
+					totalNet_median_part = totalNet[myfilter]
+					loc,scale = stats.norm.fit(totalNet_median_part)
+					totalNet = np.concatenate(([totalNet[0]],totalNet))
+					snr = (totalNet-loc)/scale
+					print('binwidth=',binwidth,'loc&scale: Det_'+str(i),':',loc,scale)
+					#axes[i//2,i%2].plot(tbins,snr,linestyle='steps',lw=1.0,
+					#	color=my_colors[seq],alpha=0.5,label=str(binwidth))
+					axes[i//2,i%2].plot(tbins,totalNet,linestyle='steps',lw=1.0,
+						color=my_colors[seq],alpha=0.5,label=str(binwidth))
+					axes[i//2,i%2].tick_params(labelsize=25)
+					if i == 1:
+						axes[i//2,i%2].legend(fontsize=20)
+				f.close()
+			axes[0,0].set_xlim([viewt1,viewt2])
+			#axes[0,0].set_ylim([-1,4])
+			fig.text(0.07, 0.5, 'Signal-to-noise ratio', ha='center',
+							va='center',rotation='vertical',fontsize=30)
+			fig.text(0.5, 0.05, 'Time (s)', ha='center', 
+							va='center',fontsize=30)		
+			fig.text(0.5, 0.92, self.bnname, ha='center',
+							va='center',fontsize=30)			
+			plt.savefig(self.resultdir+'/check_mb_base_SNR.png')
+			plt.close()
+
 	def netlc(self,viewt1=-50,viewt2=300):
 		if not os.path.exists(self.resultdir+'/net_lc.png'):
 			assert os.path.exists(self.baseresultdir), ('Should have run base() '
@@ -1839,148 +1982,4 @@ class GRB:
 
 	def removebase(self):
 		os.system('rm -rf '+self.baseresultdir)
-	
-
-#############################	
-# BEGIN derived class deGRB #
-#############################
-# for checking snr with different binwidth in baseline
-class deGRB(GRB):
-		
-	def de_base(self,de_baset1=-50,de_baset2=300,de_binwidth=[1.0,0.1,0.01]):
-		self.de_baseresultdir = self.baseresultdir+'/de_base/'
-		self.de_baset1 = np.max([self.GTI1,de_baset1])
-		self.de_baset2 = np.min([self.GTI2,de_baset2])
-
-		assert self.de_baset1<self.de_baset2, self.bnname+': Inappropriate base times!'
-		if not os.path.exists(self.de_baseresultdir):
-			os.makedirs(self.de_baseresultdir)
-			for seq,binwidth in enumerate(de_binwidth):
-				tbins = np.arange(self.de_baset1,self.de_baset2+binwidth,binwidth)
-				f = h5py.File(self.de_baseresultdir+'/base_'+str(seq)+'.h5',mode='w')
-				for i in range(14):
-					grp = f.create_group(Det[i])
-					ttefile = glob(self.datadir+'/'+'glg_tte_'+Det[i]
-										+'_'+self.bnname+'_v*.fit')
-					hdu = fits.open(ttefile[0])	
-					trigtime = hdu['Primary'].header['TRIGTIME']
-					data = hdu['EVENTS'].data
-					timedata = data.field(0)-trigtime
-					chdata = data.field(1)
-					for ch in range(128):
-						time_selected = timedata[chdata==ch]
-						histvalue, histbin = np.histogram(time_selected,bins=tbins)
-						rate = histvalue/binwidth
-						r.assign('rrate',rate) 
-						r("y=matrix(rrate,nrow=1)")
-						fillPeak_hwi = str(int(5/binwidth))
-						fillPeak_int = str(int(len(rate)/10))
-						r("rbase=baseline(y,lam = 6, hwi="+fillPeak_hwi
-								+", it=10,int ="+fillPeak_int
-								+", method='fillPeaks')")
-						r("bs=getBaseline(rbase)")
-						r("cs=getCorrected(rbase)")
-						bs = r('bs')[0]
-						cs = r('cs')[0]
-						# correct negative base to 0 and recover the net value to original rate
-						corrections_index = bs<0
-						bs[corrections_index] = 0
-						cs[corrections_index] = rate[corrections_index]
-						f['/'+Det[i]+'/ch'+str(ch)] = np.array([rate,bs,cs])
-				f.flush()
-				f.close()
-				
-				
-# check gaussian distribution for different bin sizes
-	def check_debase_gaussian_net_rate(self,sigma=3,de_binwidth=[1.0,0.1,0.01]):
-		if not os.path.exists(self.resultdir+'/check_debase_gaussian_net_rate_0.png'):
-			assert os.path.exists(self.de_baseresultdir), ('Should have run '
-				'de_base() before running check_debase_gaussian_net_rate()!')
-			for seq,binwidth in enumerate(de_binwidth):
-				tbins = np.arange(self.de_baset1,self.de_baset2+binwidth,binwidth)
-				f = h5py.File(self.de_baseresultdir+'/base_'+str(seq)+'.h5',mode='r')
-				fig, axes = plt.subplots(7,2,figsize=(32, 20),
-										sharex=False,sharey=False)
-				for i in range(14):
-					cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
-								for ch in np.arange(ch1,ch2+1) ])
-					totalNet = np.sum(cNet,axis=0)
-					#clip the outliers and fit the central median part
-					mask = sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
-					myfilter = list(map(operator.not_, mask))
-					totalNet_median_part = totalNet[myfilter]
-					bins=np.arange(totalNet.min(),totalNet.max(),
-					(totalNet_median_part.max()-totalNet_median_part.min())/25)
-					histvalue, histbin = np.histogram(totalNet,bins=bins)
-					histvalue = np.concatenate(([histvalue[0]],histvalue))
-					axes[i//2,i%2].fill_between(histbin,histvalue,step='pre',
-						label = 'Observed net rate, binwidth='+str(binwidth))
-					loc,scale = stats.norm.fit(totalNet_median_part)
-					Y = stats.norm(loc=loc,scale=scale)
-					x = np.linspace(totalNet_median_part.min(),
-									totalNet_median_part.max(),num=100)
-					axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),
-								label='Gaussian Distribution',
-								linestyle='--',lw=3.0,color='tab:orange')
-					axes[i//2,i%2].tick_params(labelsize=25)
-					axes[i//2,i%2].text(0.05,0.85,Det[i],fontsize=25,
-									transform=axes[i//2,i%2].transAxes)
-					gaussian_level = Y.interval(norm_pvalue(sigma))
-					axes[i//2,i%2].axvline(totalNet_median_part.max(),ls='--',
-						lw=2,color='green',label='region for gaussing fitting')
-					axes[i//2,i%2].axvline(totalNet_median_part.min(),
-											ls='--',lw=2,color='green')
-					if i ==1 :
-						axes[i//2,i%2].legend(fontsize=20)
-				f.close()
-				fig.text(0.07, 0.5, 'Numbers', ha='center', va='center',
-										rotation='vertical',fontsize=30)
-				fig.text(0.5, 0.05, 'Total net rate (s$^{-1}$; between '
-					+str(self.de_baset1)+'--'+str(self.de_baset2)+'s)',
-					ha='center', va='center',fontsize=30)					
-				plt.savefig(self.resultdir+'/check_debase_gaussian_net_rate_'
-													+str(seq)+'.png')
-				plt.close()
-		
-				
-# check SNR with different bin sizes
-	def check_debase_snr(self,viewt1=-50,viewt2=300,de_binwidth=[1.0,0.1,0.01]):
-		if not os.path.exists(self.resultdir+'/check_debase_SNR.png'):
-			assert os.path.exists(self.de_baseresultdir), ('Should have run '
-						'de_base() before running check_debase_snr()!')
-			viewt1 = np.max([self.de_baset1,viewt1])
-			viewt2 = np.min([self.de_baset2,viewt2])
-			fig, axes = plt.subplots(7,2,figsize=(32, 20),sharex=True,sharey=True)
-			ylim = np.zeros((14,2))
-			my_colors = ['black','red','blue']
-			for seq,binwidth in enumerate(de_binwidth):
-				tbins = np.arange(self.de_baset1,self.de_baset2+binwidth,binwidth)
-				f = h5py.File(self.de_baseresultdir+'/base_'+str(seq)+'.h5',mode='r')
-				for i in range(14):
-					cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
-									for ch in np.arange(ch1,ch2+1) ])
-					totalNet = np.sum(cNet,axis=0)
-					#clip the outliers and fit the central median part
-					mask = sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
-					myfilter = list(map(operator.not_, mask))
-					totalNet_median_part = totalNet[myfilter]
-					loc,scale = stats.norm.fit(totalNet_median_part)
-					totalNet = np.concatenate(([totalNet[0]],totalNet))
-					snr = (totalNet-loc)/scale
-					axes[i//2,i%2].plot(tbins,snr,linestyle='steps',lw=1.0,
-						color=my_colors[seq],alpha=0.5,label=str(binwidth))
-					axes[i//2,i%2].tick_params(labelsize=25)
-					if i == 1:
-						axes[i//2,i%2].legend(fontsize=20)
-				f.close()
-			axes[0,0].set_xlim([viewt1,viewt2])
-			#axes[0,0].set_ylim([-1,4])
-			fig.text(0.07, 0.5, 'Signal-to-noise ratio', ha='center',
-							va='center',rotation='vertical',fontsize=30)
-			fig.text(0.5, 0.05, 'Time (s)', ha='center', 
-							va='center',fontsize=30)		
-			fig.text(0.5, 0.92, self.bnname, ha='center',
-							va='center',fontsize=30)			
-			plt.savefig(self.resultdir+'/check_debase_SNR.png')
-			plt.close()
 					
