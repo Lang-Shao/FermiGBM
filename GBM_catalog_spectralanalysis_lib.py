@@ -1264,7 +1264,15 @@ class GRB:
 				for kk in range(1,round(0.5/self.binwidth)):
 					if element+kk in goodIndex:
 						goodIndex.remove(element+kk)
-			#make plots											
+			#make plots	and save t0_t1_duration
+			goodIndex_sorted = sorted(goodIndex)
+			x0 = self.tbins[goodIndex_sorted[0]]
+			x1 = self.tbins[goodIndex_sorted[-1]]
+			x_width = np.max([x1-x0,2.0])
+			with open(self.resultdir+'/t0_t1_duration.txt','w') as f_tmp:
+				f_tmp.write(str(round(self.tbins[goodIndex_sorted[0]]-self.binwidth,5))+' '
+					+str(round(self.tbins[goodIndex_sorted[-1]],5))+' '
+					+str(round(self.tbins[goodIndex_sorted[-1]]-self.tbins[goodIndex_sorted[0]]+self.binwidth,5)))										
 			for i in range(14):
 				cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
 							for ch in np.arange(ch1,ch2+1) ])
@@ -1283,14 +1291,10 @@ class GRB:
 					ls='--',lw=3,color='orange',
 					label=str(sigma)+'$\sigma$ level of gaussian background')
 				axes[i//2,i%2].tick_params(labelsize=25)
-				if len(goodIndex) >= 1:
+				if goodIndex:
 					for seq in goodIndex:
 						axes[i//2,i%2].axvline(x=self.tbins[seq],
 									ymin=0.95,color='red',zorder=2)
-					goodIndex_sorted = sorted(goodIndex)
-					x0 = self.tbins[goodIndex_sorted[0]]
-					x1 = self.tbins[goodIndex_sorted[-1]]
-					x_width = np.max([x1-x0,2.0])
 					axes[i//2,i%2].set_xlim([ np.max([x0-x_width,viewt1]),
 											np.min([x1+x_width,viewt2]) ])
 				else:
