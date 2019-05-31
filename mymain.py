@@ -24,10 +24,10 @@ def main():
 	for bnname in trigger_name:
 		t0,t1,duration = read_duration(bnname)
 		if duration:
-			good_burst_bnname.expand(bnname)
-			good_burst_t0.expand(t0)
-			good_burst_t1.expand(t1)
-			good_burst_duration.expand(duration)
+			good_burst_bnname.append(bnname)
+			good_burst_t0.append(t0)
+			good_burst_t1.append(t1)
+			good_burst_duration.append(duration)
 	print(good_burst_bnname)
 	print(good_burst_duration)
 

@@ -1122,7 +1122,7 @@ class GRB:
 									for ch in np.arange(ch1,ch2+1) ])
 				totalNet = np.sum(cNet,axis=0)
 				#clip the outliers and fit the central median part
-				mask = sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+				mask = sigma_clip(totalNet,sigma=3,maxiters=20,stdfunc=mad_std).mask
 				myfilter = list(map(operator.not_, mask))
 				totalNet_median_part = totalNet[myfilter]
 				loc,scale = stats.norm.fit(totalNet_median_part)
@@ -1224,7 +1224,7 @@ class GRB:
 									for ch in np.arange(ch1,ch2+1) ])
 				totalNet = np.sum(cNet,axis=0)
 				#clip the outliers and fit the central median part
-				mask = sigma_clip(totalNet,sigma=5,maxiters=5,stdfunc=mad_std).mask
+				mask = sigma_clip(totalNet,sigma=3,maxiters=20,stdfunc=mad_std).mask
 				myfilter = list(map(operator.not_, mask))
 				totalNet_median_part = totalNet[myfilter]
 				loc,scale = stats.norm.fit(totalNet_median_part)
