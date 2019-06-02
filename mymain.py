@@ -20,7 +20,7 @@ def main():
 		if __name__ == '__main__':
 			p = Pool(ncore)
 			total_num = len(trigger_name)
-			pars =  [bnname,total_num] for bnname in trigger_name]
+			pars =  [[bnname,total_num] for bnname in trigger_name]
 			p.map(inspect_GRB,pars)	
 	
 	multiprocessing_GRB()
