@@ -8,18 +8,22 @@ def main():
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
 	print(trigger_name)
 	global badsampledir
+	global index_GRB
+	index_GRB = 0
 	cdir = os.getcwd()
 	badsampledir = cdir+'/bad_sample/'
 	if not os.path.exists(badsampledir):
 		os.makedirs(badsampledir)
 
 	@timer
-	def multiprocessing_GRB(inspect_GRB,trigger_name):
+	def multiprocessing_GRB():
 		if __name__ == '__main__':
 			p = Pool(ncore)
-			p.map(inspect_GRB,trigger_name)	
+			total_num = len(trigger_name)
+			pars =  [bnname,total_num] for bnname in trigger_name]
+			p.map(inspect_GRB,pars)	
 	
-	multiprocessing_GRB(inspect_GRB,trigger_name)
+	multiprocessing_GRB()
 
 	good_burst_bnname = []
 	good_burst_t0 = []
@@ -45,8 +49,12 @@ def main():
 		inspect_GRB(bn)
 	'''
 
-def inspect_GRB(bnname):	
-	print('Processing: '+bnname, end='\r')
+def inspect_GRB(pars):
+	bnname,total_num = pars
+	global index_GRB
+	index_GRB += 1
+	print('[Processing: '+bnname+' ] '+str(index_GRB)+'/'+str(total_num)
+			+' ('+str(round(index_GRB/total_num*100,1))+'%)',end='\r')
 	grb = GRB(bnname)
 	if grb.dataready:
 		#currently useful
