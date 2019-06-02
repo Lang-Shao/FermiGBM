@@ -52,7 +52,7 @@ def inspect_GRB(pars):
 	resultdir = os.getcwd()+'/results/'
 	if not os.path.exists(resultdir):
 		os.makedirs(resultdir)
-	index_GRB = len(os.listdir(resultdir))
+	index_GRB = len(os.listdir(resultdir))+1
 	print('[Processing: '+bnname+' ] '+str(index_GRB)+'/'+str(total_num)
 			+' ('+str(round(index_GRB/total_num*100,1))+'%)',end='\r')
 	grb = GRB(bnname)
