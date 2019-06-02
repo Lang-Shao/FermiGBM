@@ -1279,14 +1279,15 @@ class GRB:
 					if element+kk in goodIndex:
 						goodIndex.remove(element+kk)
 			#make plots	and save t0_t1_duration
-			goodIndex_sorted = sorted(goodIndex)
-			x0 = self.tbins[goodIndex_sorted[0]]
-			x1 = self.tbins[goodIndex_sorted[-1]]
-			x_width = np.max([x1-x0,2.0])
-			with open(self.resultdir+'/t0_t1_duration.txt','w') as f_tmp:
-				f_tmp.write(str(round(self.tbins[goodIndex_sorted[0]]-self.binwidth,5))+' '
-					+str(round(self.tbins[goodIndex_sorted[-1]],5))+' '
-					+str(round(self.tbins[goodIndex_sorted[-1]]-self.tbins[goodIndex_sorted[0]]+self.binwidth,5)))										
+			if goodIndex:
+				goodIndex_sorted = sorted(goodIndex)
+				x0 = self.tbins[goodIndex_sorted[0]]
+				x1 = self.tbins[goodIndex_sorted[-1]]
+				x_width = np.max([x1-x0,2.0])
+				with open(self.resultdir+'/t0_t1_duration.txt','w') as f_tmp:
+					f_tmp.write(str(round(self.tbins[goodIndex_sorted[0]]-self.binwidth,5))+' '
+						+str(round(self.tbins[goodIndex_sorted[-1]],5))+' '
+						+str(round(self.tbins[goodIndex_sorted[-1]]-self.tbins[goodIndex_sorted[0]]+self.binwidth,5)))										
 			for i in range(14):
 				cNet = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][2] 
 							for ch in np.arange(ch1,ch2+1) ])
