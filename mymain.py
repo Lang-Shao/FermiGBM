@@ -8,8 +8,6 @@ def main():
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
 	print(trigger_name)
 	global badsampledir
-	global index_GRB
-	index_GRB = 0
 	cdir = os.getcwd()
 	badsampledir = cdir+'/bad_sample/'
 	if not os.path.exists(badsampledir):
@@ -50,9 +48,11 @@ def main():
 	'''
 
 def inspect_GRB(pars):
-	bnname,total_num = pars
-	global index_GRB
-	index_GRB += 1
+	bnname, total_num = pars
+	resultdir = os.getcwd()+'/results/'
+	if not os.path.exists(resultdir):
+		os.makedirs(resultdir)
+	index_GRB = len(os.listdir(resultdir))
 	print('[Processing: '+bnname+' ] '+str(index_GRB)+'/'+str(total_num)
 			+' ('+str(round(index_GRB/total_num*100,1))+'%)',end='\r')
 	grb = GRB(bnname)

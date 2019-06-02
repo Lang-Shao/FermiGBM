@@ -817,8 +817,6 @@ class GRB:
 			self.GTI2 = None
 			resultdir = os.getcwd()+'/results/'
 			self.resultdir = resultdir+'/'+bnname+'/'
-			if not os.path.exists(resultdir):
-				os.makedirs(resultdir)
 			if not os.path.exists(self.resultdir):
 				os.makedirs(self.resultdir)
 			self.baseresultdir = self.resultdir+'/base/'
