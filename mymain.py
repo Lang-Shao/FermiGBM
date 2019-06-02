@@ -30,6 +30,9 @@ def main():
 			good_burst_duration.append(duration)
 	print(good_burst_bnname)
 	print(good_burst_duration)
+	plt.hist(good_burst_duration)
+	plt.savefit('./duration_hist.png')
+	
 
 	'''
 	inspect_GRB('bn190114873')
@@ -49,7 +52,9 @@ def inspect_GRB(bnname):
 		grb.plot_gaussian_level_over_net_lc()
 		grb.check_pulse()
 		grb.countmap()
-
+		#remove basedir to save disk space
+		grb.removebase()
+		
 		#currently not useful
 		#grb.check_snr()
 		#grb.skymap()
@@ -60,7 +65,6 @@ def inspect_GRB(bnname):
 		#grb.check_poisson_time_resolved_net_spectrum()
 		#grb.netlc()
 		#grb.rsp()
-
 		#grb.multi_binwidth_base()
 		#grb.check_mb_base_snr(viewt1=-1,viewt2=25)
 		#grb.check_mb_base_gaussian_net_rate()	
@@ -73,8 +77,7 @@ def inspect_GRB(bnname):
 			grb.specanalyze('slice'+str(i))
 		'''
 		
-		#remove basedir to save disk space
-		#grb.removebase()
+		
 	else:
 		if not os.path.exists(badsampledir+'/'+bnname+'.txt'):
 			with open(badsampledir+'/'+bnname+'.txt','w') as f:
