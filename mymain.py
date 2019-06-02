@@ -12,11 +12,15 @@ def main():
 	badsampledir = cdir+'/bad_sample/'
 	if not os.path.exists(badsampledir):
 		os.makedirs(badsampledir)
+
+	@timer
+	def multiprocessing_GRB(inspect_GRB,trigger_name):
+		if __name__ == '__main__':
+			p = Pool(ncore)
+			p.map(inspect_GRB,trigger_name)	
 	
-	if __name__ == '__main__':
-		p = Pool(ncore)
-		p.map(inspect_GRB,trigger_name)	
-	
+	multiprocessing_GRB(inspect_GRB,trigger_name)
+
 	good_burst_bnname = []
 	good_burst_t0 = []
 	good_burst_t1 = []
@@ -42,7 +46,7 @@ def main():
 	'''
 
 def inspect_GRB(bnname):	
-	print('Processing: '+bnname)
+	print('Processing: '+bnname, end='\r')
 	grb = GRB(bnname)
 	if grb.dataready:
 		#currently useful
@@ -83,6 +87,8 @@ def inspect_GRB(bnname):
 			with open(badsampledir+'/'+bnname+'.txt','w') as f:
 				f.write('missing data')
 	#print(read_duration(bnname))	
+
+
 
 def read_duration(bnname):
 	duration_result = os.getcwd()+'/results/'+bnname+'/t0_t1_duration.txt'
