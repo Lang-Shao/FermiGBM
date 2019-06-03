@@ -14,7 +14,7 @@ def main():
 		os.makedirs(badsampledir)
 	if not os.path.exists(resultdir):
 		os.makedirs(resultdir)
-
+	'''
 	@timer
 	def multiprocessing_GRB():
 		if __name__ == '__main__':
@@ -25,7 +25,7 @@ def main():
 					[resultdir]*total_num,
 					[badsampledir]*total_num))	
 	multiprocessing_GRB()
-
+	'''
 	good_burst_bnname = []
 	good_burst_t0 = []
 	good_burst_t1 = []
@@ -37,10 +37,16 @@ def main():
 			good_burst_t0.append(t0)
 			good_burst_t1.append(t1)
 			good_burst_duration.append(duration)
-	print(good_burst_bnname)
-	print(good_burst_duration)
-	plt.hist(good_burst_duration)
-	plt.savefit('./duration_hist.png')
+	#print(good_burst_bnname)
+	#print(good_burst_duration)
+	duration_bins = np.logspace(-2,3,101)
+	histvalue, histbin = np.histogram(good_burst_duration,bins=duration_bins)
+	histvalue = np.concatenate(([histvalue[0]],histvalue))
+	plt.plot(histbin,histvalue,ls='steps')
+	
+	plt.xscale('log')
+	plt.yscale('log')
+	plt.savefig('./duration_hist.png')
 	
 
 	'''
