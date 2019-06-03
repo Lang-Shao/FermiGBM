@@ -6,21 +6,24 @@ def main():
 	fermigbrst = query_fermigbrst()
 	df = pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
-	print(trigger_name)
-	global badsampledir
+	print('cataloged_trigger_name= ',trigger_name)
 	cdir = os.getcwd()
 	badsampledir = cdir+'/bad_sample/'
+	resultdir = cdir+'/results/'
 	if not os.path.exists(badsampledir):
 		os.makedirs(badsampledir)
+	if not os.path.exists(resultdir):
+		os.makedirs(resultdir)
 
 	@timer
 	def multiprocessing_GRB():
 		if __name__ == '__main__':
 			p = Pool(ncore)
 			total_num = len(trigger_name)
-			pars =  [[bnname,total_num] for bnname in trigger_name]
-			p.map(inspect_GRB,pars)	
-	
+			p.map(inspect_GRB,zip(trigger_name,
+					[total_num]*total_num,
+					[resultdir]*total_num,
+					[badsampledir]*total_num))	
 	multiprocessing_GRB()
 
 	good_burst_bnname = []
@@ -28,7 +31,7 @@ def main():
 	good_burst_t1 = []
 	good_burst_duration = []
 	for bnname in trigger_name:
-		t0,t1,duration = read_duration(bnname)
+		t0,t1,duration = read_duration(bnname,resultdir)
 		if duration:
 			good_burst_bnname.append(bnname)
 			good_burst_t0.append(t0)
@@ -47,15 +50,16 @@ def main():
 		inspect_GRB(bn)
 	'''
 
+####################
+## Some functions ##
+####################
+
 def inspect_GRB(pars):
-	bnname, total_num = pars
-	resultdir = os.getcwd()+'/results/'
-	if not os.path.exists(resultdir):
-		os.makedirs(resultdir)
+	bnname, total_num, resultdir, badsampledir = pars
 	index_GRB = len(os.listdir(resultdir))+1
 	print('[Processing: '+bnname+' ] '+str(index_GRB)+'/'+str(total_num)
 			+' ('+str(round(index_GRB/total_num*100,1))+'%)',end='\r')
-	grb = GRB(bnname)
+	grb = GRB(bnname, resultdir)
 	if grb.dataready:
 		#currently useful
 		grb.rawlc(viewt1=-50,viewt2=300,binwidth=0.064)
@@ -88,26 +92,23 @@ def inspect_GRB(pars):
 			grb.phaI(slicet1=timebins[i],slicet2=timebins[i+1]) 
 			grb.specanalyze('slice'+str(i))
 		'''
-		
-		
 	else:
 		if not os.path.exists(badsampledir+'/'+bnname+'.txt'):
 			with open(badsampledir+'/'+bnname+'.txt','w') as f:
-				f.write('missing data')
-	#print(read_duration(bnname))	
+				f.write('missing data')	
 
 
-
-def read_duration(bnname):
-	duration_result = os.getcwd()+'/results/'+bnname+'/t0_t1_duration.txt'
+def read_duration(bnname,resultdir):
+	duration_result = resultdir+'/'+bnname+'/t0_t1_duration.txt'
 	t0,t1,duration = None,None,None	
 	if os.path.exists(duration_result):
 		with open(duration_result) as f:
 			t0,t1,duration = np.array(f.readline().split()).astype(np.float)
-			#print(t0,t1,duration)
 	return t0,t1,duration
 
-# Always run this Main part #
+############
+# RUN MAIN #
+############
 if __name__ == '__main__':
 	main()
 	#inspect_GRB('bn190114873')

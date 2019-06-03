@@ -790,7 +790,7 @@ def copy_rspI(bnname,det,outfile):
 ########################
 
 class GRB:
-	def __init__(self,bnname):
+	def __init__(self,bnname, resultdir):
 		self.bnname = bnname
 		shortyear = self.bnname[2:4]
 		fullyear = '20'+shortyear
@@ -815,7 +815,7 @@ class GRB:
 			self.phaIresultdir = None
 			self.GTI1 = None
 			self.GTI2 = None
-			resultdir = os.getcwd()+'/results/'
+			#resultdir = os.getcwd()+'/results/'
 			self.resultdir = resultdir+'/'+bnname+'/'
 			if not os.path.exists(self.resultdir):
 				os.makedirs(self.resultdir)
