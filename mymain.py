@@ -6,6 +6,7 @@ def main():
 	fermigbrst = query_fermigbrst()
 	df = pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
+	#t90 = df['t90'].apply(lambda x:x.strip()).values
 	print('cataloged_trigger_name= ',trigger_name)
 	cdir = os.getcwd()
 	badsampledir = cdir+'/bad_sample/'
@@ -39,16 +40,43 @@ def main():
 			good_burst_duration.append(duration)
 	#print(good_burst_bnname)
 	#print(good_burst_duration)
-	duration_bins = np.logspace(-2,3,101)
-	histvalue, histbin = np.histogram(good_burst_duration,bins=duration_bins)
-	histvalue = np.concatenate(([histvalue[0]],histvalue))
-	plt.plot(histbin,histvalue,ls='steps')
+	if not os.path.exists('./duration_hist.png'):
+		duration_bins = np.logspace(-2,3,101)
+		histvalue, histbin = np.histogram(good_burst_duration,bins=duration_bins)
+		histvalue = np.concatenate(([histvalue[0]],histvalue))
+		plt.plot(histbin,histvalue,ls='steps')
+		
+		plt.xscale('log')
+		plt.yscale('log')
+		plt.savefig('./duration_hist.png')
 	
-	plt.xscale('log')
-	plt.yscale('log')
-	plt.savefig('./duration_hist.png')
+	#catalog_burst_duration = df[df.columns[1]].values
+	#print(catalog_burst_duration)
+	#print(float(df.loc[1,df.columns[1]]))
 	
-
+	
+	df_good_burst=pd.DataFrame(np.array([good_burst_bnname,good_burst_duration,good_burst_t0,good_burst_t1]).T,
+											columns=['bnname','duration','t0','t1'])
+	df_good_burst.to_csv('./good_burst.csv',index=False)
+	
+		
+	print(df[df.columns[0]].values)
+	
+	index = trigger_name == good_burst_bnname[0]
+	print(good_burst_bnname[0],good_burst_duration[0],df[df.columns[1]].values[index])
+	
+	
+	'''
+	if not os.path.exists('./catalog_duration_hist.png'):
+		duration_bins = np.logspace(-2,3,101)
+		histvalue, histbin = np.histogram(catalog_burst_duration,bins=duration_bins)
+		histvalue = np.concatenate(([histvalue[0]],histvalue))
+		plt.plot(histbin,histvalue,ls='steps')
+		
+		plt.xscale('log')
+		plt.yscale('log')
+		plt.savefig('./catalog_duration_hist.png')
+	'''
 	'''
 	inspect_GRB('bn190114873')
 	for bn in trigger_name:
