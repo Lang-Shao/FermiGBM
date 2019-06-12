@@ -27,6 +27,7 @@ def main():
 					[badsampledir]*total_num))	
 	multiprocessing_GRB()
 	'''
+	'''
 	good_burst_bnname = []
 	good_burst_t0 = []
 	good_burst_t1 = []
@@ -65,7 +66,7 @@ def main():
 	index = trigger_name == good_burst_bnname[0]
 	print(good_burst_bnname[0],good_burst_duration[0],df[df.columns[1]].values[index])
 	
-	
+	'''
 	'''
 	if not os.path.exists('./catalog_duration_hist.png'):
 		duration_bins = np.logspace(-2,3,101)

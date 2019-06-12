@@ -55,7 +55,7 @@ ncore = get_ncore()
 # Classes for skymap #
 ########################
 
-# ****the following mostly comes from zjh_gbmgeometry.py****
+# ****the followings come from zjh_gbmgeometry.py****
 class GBM_detector:
 	def __init__(self,name,quaternion):
 		self.name = name
@@ -617,18 +617,10 @@ def query_fermigbrst(cdir='./'):
 			$ sudo add-apt-repository ppa:linuxuprising/java
 			$ sudo apt update
 			$ sudo apt install oracle-java10-installer"""
-		fields = ("trigger_name,t90,t90_error,t90_start,bcat_detector_mask,"
-			"duration_energy_low,duration_energy_high,"
-			"back_interval_low_start,back_interval_low_stop,"
-			"back_interval_high_start,back_interval_high_stop,"
-			"flnc_band_epeak,flnc_band_epeak_pos_err,flnc_band_epeak_neg_err,"
-			"flnc_band_alpha,flnc_band_alpha_pos_err,flnc_band_alpha_neg_err,"
-			"flnc_band_beta,flnc_band_beta_pos_err,flnc_band_beta_neg_err,"
-			"flnc_spectrum_start,flnc_spectrum_stop,scat_detector_mask,"
-			"pflx_spectrum_start,pflx_spectrum_stop,"
-			"pflx_band_epeak,pflx_band_epeak_pos_err,pflx_band_epeak_neg_err,"
-			"pflx_band_alpha,pflx_band_alpha_pos_err,pflx_band_alpha_neg_err,"
-			"pflx_band_beta,pflx_band_beta_pos_err,pflx_band_beta_neg_err")
+		fields = ("trigger_name,t90,t90_error,t90_start,"
+			"ra,dec,Error_Radius,lii,bii,"
+			"fluence,fluence_error,"
+			"flux_64,flux_64_error,flux_64_time")
 		print('querying fermigbrst catalog using HEASARC-Xamin-users.jar ...')
 		query_ready = os.system("java -jar "+usersjar+" table=fermigbrst fields="
 				+fields+" sortvar=trigger_name output="+cdir+"/fermigbrst.txt")
