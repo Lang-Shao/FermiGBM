@@ -872,7 +872,7 @@ class GRB:
 				histvalue, histbin = np.histogram(time,bins=tbins)
 				plotrate = histvalue/binwidth
 				plotrate = np.concatenate(([plotrate[0]],plotrate))
-				axes[i//2,i%2].plot(histbin,plotrate,linestyle='steps')
+				axes[i//2,i%2].plot(histbin,plotrate,drawstyle='steps')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.05,0.85,Det[i],fontsize=25,
@@ -942,7 +942,7 @@ class GRB:
 					mysource = SkyCoord(ra, dec, frame = 'icrs')
 					x, y = map(mysource.ra.deg,mysource.dec.deg)
 					map.plot(x, y, color='r',marker='o',markersize=20,ls='None')
-					plt.text(x, y, '  GRB', fontsize=10)
+					plt.text(x, y, '    GRB', fontsize=10)
 				plt.title(timestr+' (T0+'+str((seq*10-10))+' s)',fontsize=25)
 				plt.savefig(self.resultdir+'/skymap_'+str(seq)+'.png')
 				plt.close()
@@ -1004,11 +1004,11 @@ class GRB:
 				for i in range(14):
 					plotrate = f['/'+Det[i]+'/ch'+str(ch)][()][0] #rate
 					plotrate = np.concatenate(([plotrate[0]],plotrate))
-					axes[i//2,i%2].plot(self.tbins,plotrate,linestyle='steps',
+					axes[i//2,i%2].plot(self.tbins,plotrate,drawstyle='steps',
 										lw=3.0,color='tab:blue')
 					plotbase = f['/'+Det[i]+'/ch'+str(ch)][()][1] #base
 					plottime = self.tbins[:-1]+self.binwidth/2.0
-					axes[i//2,i%2].plot(plottime,plotbase,linestyle='--',
+					axes[i//2,i%2].plot(plottime,plotbase,drawstyle='--',
 										lw=4.0,color='tab:orange')
 					axes[i//2,i%2].set_xlim([self.tbins[0],self.tbins[-1]])
 					axes[i//2,i%2].tick_params(labelsize=25)
@@ -1051,7 +1051,7 @@ class GRB:
 							totalRate_median_part.max(),num=100)
 				axes[i//2,i%2].plot(x,Y.pdf(x)*totalRate.size*(bins[1]-bins[0]),
 								label='Gaussian Distribution',
-								linestyle='--',lw=3.0,color='tab:orange')
+								drawstyle='--',lw=3.0,color='tab:orange')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.5,0.8,Det[i],fontsize=25,
 							transform=axes[i//2,i%2].transAxes)
@@ -1098,7 +1098,7 @@ class GRB:
 								num=100)
 				axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),
 							label='Gaussian Distribution within clipped region',
-							linestyle='--',lw=3.0,color='tab:orange')
+							drawstyle='--',lw=3.0,color='tab:orange')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.5,0.8,Det[i],fontsize=25,
 								transform=axes[i//2,i%2].transAxes)
@@ -1140,7 +1140,7 @@ class GRB:
 				Y = stats.norm(loc=loc,scale=scale)
 				gaussian_level = Y.interval(norm_pvalue(sigma))
 				totalNet = np.concatenate(([totalNet[0]],totalNet))
-				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',
+				axes[i//2,i%2].plot(self.tbins,totalNet,drawstyle='steps',
 									lw=3.0,color='tab:blue')
 				axes[i//2,i%2].axhline(gaussian_level[1],
 					ls='--',lw=3,color='orange',
@@ -1191,7 +1191,7 @@ class GRB:
 				loc,scale = stats.norm.fit(totalNet_median_part)
 				totalNet = np.concatenate(([totalNet[0]],totalNet))
 				snr = (totalNet-loc)/scale
-				axes[i//2,i%2].plot(self.tbins,snr,linestyle='steps',
+				axes[i//2,i%2].plot(self.tbins,snr,drawstyle='steps',
 										lw=3.0,color='tab:blue')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
@@ -1297,7 +1297,7 @@ class GRB:
 				Y = stats.norm(loc=loc,scale=scale)
 				gaussian_level = Y.interval(norm_pvalue(sigma))
 				totalNet = np.concatenate(([totalNet[0]],totalNet))
-				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',
+				axes[i//2,i%2].plot(self.tbins,totalNet,drawstyle='steps',
 									lw=3.0,color='tab:blue')
 				axes[i//2,i%2].axhline(gaussian_level[1],
 					ls='--',lw=3,color='orange',
@@ -1353,7 +1353,7 @@ class GRB:
 					x_int = np.arange(0,maxcount+1)
 					plothist = Y.pmf(x_int)
 					plothist = np.concatenate(([plothist[0]],plothist))
-					axes[i//2,i%2].plot(bins,plothist,linestyle='steps',
+					axes[i//2,i%2].plot(bins,plothist,drawstyle='steps',
 									label='Baseline Poisson PMF (from base)',
 									lw=4.0,color='tab:orange')
 					hist,bin_edged = np.histogram(plotcount,bins=bins)
@@ -1427,7 +1427,7 @@ class GRB:
 						bins = np.arange(-0.5,maxcount+1.5)
 						poissonpmf = Y.pmf(x_int)
 						poissonpmf = np.concatenate(([poissonpmf[0]],poissonpmf))
-						axes[i//2,i%2].plot(bins,poissonpmf,linestyle='steps',
+						axes[i//2,i%2].plot(bins,poissonpmf,drawstyle='steps',
 										label='Poisson PMF of mean net rate',
 										lw=4.0,color='tab:orange')
 						hist,bin_edged = np.histogram(spectrum,bins=bins)
@@ -1531,7 +1531,7 @@ class GRB:
 									totalNet_median_part.max(),num=100)
 					axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),
 								label='Gaussian Distribution',
-								linestyle='--',lw=3.0,color='tab:orange')
+								drawstyle='--',lw=3.0,color='tab:orange')
 					axes[i//2,i%2].tick_params(labelsize=25)
 					axes[i//2,i%2].text(0.05,0.85,Det[i],fontsize=25,
 									transform=axes[i//2,i%2].transAxes)
@@ -1578,9 +1578,9 @@ class GRB:
 					totalNet = np.concatenate(([totalNet[0]],totalNet))
 					snr = (totalNet-loc)/scale
 					print('binwidth=',binwidth,'loc&scale: Det_'+str(i),':',loc,scale)
-					#axes[i//2,i%2].plot(tbins,snr,linestyle='steps',lw=1.0,
+					#axes[i//2,i%2].plot(tbins,snr,drawstyle='steps',lw=1.0,
 					#	color=my_colors[seq],alpha=0.5,label=str(binwidth))
-					axes[i//2,i%2].plot(tbins,totalNet,linestyle='steps',lw=1.0,
+					axes[i//2,i%2].plot(tbins,totalNet,drawstyle='steps',lw=1.0,
 						color=my_colors[seq],alpha=0.5,label=str(binwidth))
 					axes[i//2,i%2].tick_params(labelsize=25)
 					if i == 1:
@@ -1629,13 +1629,13 @@ class GRB:
 									for ch in np.arange(ch1,ch2+1) ])
 				totalRate = np.sum(cRate,axis=0)
 				totalRate = np.concatenate(([totalRate[0]],totalRate))
-				axes[i//2,i%2].plot(self.tbins,totalRate,linestyle='steps',
+				axes[i//2,i%2].plot(self.tbins,totalRate,drawstyle='steps',
 												lw=3.0,color='tab:blue')
 				cBase = np.array([ f['/'+Det[i]+'/ch'+str(ch)][()][1] 
 										for ch in np.arange(ch1,ch2+1) ])
 				totalBase = np.sum(cBase,axis=0)
 				plottime = self.tbins[:-1]+self.binwidth/2.0
-				axes[i//2,i%2].plot(plottime,totalBase,linestyle='--',
+				axes[i//2,i%2].plot(plottime,totalBase,drawstyle='--',
 									lw=4.0, color='tab:orange')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				axes[i//2,i%2].tick_params(labelsize=25)
@@ -1659,7 +1659,7 @@ class GRB:
 								for ch in np.arange(ch1,ch2+1) ])
 				totalNet = np.sum(cNet,axis=0)
 				totalNet = np.concatenate(([totalNet[0]],totalNet))
-				axes[i//2,i%2].plot(self.tbins,totalNet,linestyle='steps',
+				axes[i//2,i%2].plot(self.tbins,totalNet,drawstyle='steps',
 									lw=3.0,color='tab:blue')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				if i <= 1:
@@ -1819,7 +1819,7 @@ class GRB:
 				for kk in range(len(elo)):
 					arf[kk] = filled_matrix[:,kk].sum()
 				arf = np.concatenate(([arf[0]],arf))
-				axes[i//2,i%2].plot(x,arf,linestyle='steps',lw=5)
+				axes[i//2,i%2].plot(x,arf,drawstyle='steps',lw=5)
 				axes[i//2,i%2].tick_params(axis='both',top=True,
 								right=True,length=10,width=1,
 								direction='in',which='both',labelsize=25)
@@ -1894,16 +1894,16 @@ class GRB:
 			x = np.sqrt(emax*emin)
 			axes[i//2,i%2].errorbar(x,bkg_diff,
 						yerr=bkg_uncertainty/energy_diff,
-						linestyle='None',color='blue')
+						drawstyle='None',color='blue')
 			axes[i//2,i%2].errorbar(x,total_diff,
 						yerr=total_uncertainty/energy_diff,
-						linestyle='None',color='red')
+						drawstyle='None',color='red')
 			bkg_diff = np.concatenate(([bkg_diff[0]],bkg_diff))
 			total_diff = np.concatenate(([total_diff[0]],total_diff))
 			axes[i//2,i%2].plot(energy_bins,bkg_diff,
-								linestyle='steps',color='blue')
+								drawstyle='steps',color='blue')
 			axes[i//2,i%2].plot(energy_bins,total_diff,
-								linestyle='steps',color='red')
+								drawstyle='steps',color='red')
 			axes[i//2,i%2].set_xscale('log')
 			axes[i//2,i%2].set_yscale('log')
 			axes[i//2,i%2].tick_params(labelsize=25)
