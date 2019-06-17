@@ -6,6 +6,8 @@ def main():
 	fermigbrst = query_fermigbrst()
 	df = pd.read_csv(fermigbrst,delimiter='|',header=0,skipfooter=3,engine='python')
 	trigger_name = df['trigger_name'].apply(lambda x:x.strip()).values
+	catalog_ra = df[df.columns[4]].apply(lambda x:x.split()).values
+	catalog_dec = df[df.columns[5]].apply(lambda x:x.split()).values
 	#t90 = df['t90'].apply(lambda x:x.strip()).values
 	print('cataloged_trigger_name= ',trigger_name)
 	cdir = os.getcwd()
@@ -15,18 +17,20 @@ def main():
 		os.makedirs(badsampledir)
 	if not os.path.exists(resultdir):
 		os.makedirs(resultdir)
-	'''
+	
 	@timer
 	def multiprocessing_GRB():
 		if __name__ == '__main__':
 			p = Pool(ncore)
 			total_num = len(trigger_name)
-			p.map(inspect_GRB,zip(trigger_name,
+			p.map(inspect_GRB,zip(trigger_name, 
+					catalog_ra,
+					catalog_dec,
 					[total_num]*total_num,
 					[resultdir]*total_num,
 					[badsampledir]*total_num))	
 	multiprocessing_GRB()
-	'''
+	
 	'''
 	good_burst_bnname = []
 	good_burst_t0 = []
@@ -90,7 +94,7 @@ def main():
 ####################
 
 def inspect_GRB(pars):
-	bnname, total_num, resultdir, badsampledir = pars
+	bnname, catalog_ra, catalog_dec, total_num, resultdir, badsampledir = pars
 	index_GRB = len(os.listdir(resultdir))+1
 	print('[Processing: '+bnname+' ] '+str(index_GRB)+'/'+str(total_num)
 			+' ('+str(round(index_GRB/total_num*100,1))+'%)',end='\r')
@@ -108,7 +112,7 @@ def inspect_GRB(pars):
 		
 		#currently not useful
 		#grb.check_snr()
-		#grb.skymap()
+		grb.skymap(catalog_ra, catalog_dec)
 		#grb.plotbase()
 		#grb.check_gaussian_total_rate()
 		#grb.check_poisson_rate()

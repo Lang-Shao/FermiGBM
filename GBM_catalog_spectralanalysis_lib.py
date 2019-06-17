@@ -50,7 +50,6 @@ ch1 = 3
 ch2 = 124
 ncore = get_ncore()
 
-
 ########################
 # Classes for skymap #
 ########################
@@ -782,7 +781,7 @@ def copy_rspI(bnname,det,outfile):
 ########################
 
 class GRB:
-	def __init__(self,bnname, resultdir):
+	def __init__(self, bnname, resultdir):
 		self.bnname = bnname
 		shortyear = self.bnname[2:4]
 		fullyear = '20'+shortyear
@@ -890,7 +889,7 @@ class GRB:
 			plt.savefig(self.resultdir+'/raw_lc.png')
 			plt.close()
 			
-	def skymap(self):
+	def skymap(self, catalog_ra=None, catalog_dec=None):
 		if not os.path.exists(self.resultdir+"/skymap_animated.gif"):
 			trigdatfile = glob(self.datadir+'/glg_trigdat_all_'+self.bnname+'_v*.fit')
 			hdu = fits.open(trigdatfile[0])
@@ -918,7 +917,7 @@ class GRB:
 				myGBM = GBM(qsj,pos*u.m,timestrisot)		
 				fig = plt.figure(figsize=(20,10))
 				ax = fig.add_subplot(111)
-				map = Basemap(projection='moll', lat_0=0, lon_0=0, resolution='l',
+				map = Basemap(projection='moll', lat_0=0, lon_0=180, resolution='l',
 									area_thresh=1000.0, celestial=True, ax=ax)
 				myGBM.detector_plot(radius=10, lat_0=0, lon_0=90, point=grb,
 										show_bodies=True, BGO=False, map=map)
@@ -937,6 +936,13 @@ class GRB:
 				_ = map.drawparallels(np.arange(-90, 90, 15), dashes=[1,0],
 									labels=[1,0,0,1], color='#d9d6c3',size=20)
 				map.drawmapboundary(fill_color='#f6f5ec')
+				if catalog_ra:
+					ra = "{}h{}m{}s".format(catalog_ra[0],catalog_ra[1],catalog_ra[2])
+					dec = "{}d{}m{}s".format(catalog_dec[0],catalog_dec[1],catalog_dec[2])
+					mysource = SkyCoord(ra, dec, frame = 'icrs')
+					x, y = map(mysource.ra.deg,mysource.dec.deg)
+					map.plot(x, y, color='r',marker='o',markersize=20,ls='None')
+					plt.text(x, y, '  GRB', fontsize=10)
 				plt.title(timestr+' (T0+'+str((seq*10-10))+' s)',fontsize=25)
 				plt.savefig(self.resultdir+'/skymap_'+str(seq)+'.png')
 				plt.close()
