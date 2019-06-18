@@ -1008,7 +1008,7 @@ class GRB:
 										lw=3.0,color='tab:blue')
 					plotbase = f['/'+Det[i]+'/ch'+str(ch)][()][1] #base
 					plottime = self.tbins[:-1]+self.binwidth/2.0
-					axes[i//2,i%2].plot(plottime,plotbase,drawstyle='--',
+					axes[i//2,i%2].plot(plottime,plotbase,linestyle='--',
 										lw=4.0,color='tab:orange')
 					axes[i//2,i%2].set_xlim([self.tbins[0],self.tbins[-1]])
 					axes[i//2,i%2].tick_params(labelsize=25)
@@ -1051,7 +1051,7 @@ class GRB:
 							totalRate_median_part.max(),num=100)
 				axes[i//2,i%2].plot(x,Y.pdf(x)*totalRate.size*(bins[1]-bins[0]),
 								label='Gaussian Distribution',
-								drawstyle='--',lw=3.0,color='tab:orange')
+								linestyle='--',lw=3.0,color='tab:orange')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.5,0.8,Det[i],fontsize=25,
 							transform=axes[i//2,i%2].transAxes)
@@ -1098,7 +1098,7 @@ class GRB:
 								num=100)
 				axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),
 							label='Gaussian Distribution within clipped region',
-							drawstyle='--',lw=3.0,color='tab:orange')
+							linestyle='--',lw=3.0,color='tab:orange')
 				axes[i//2,i%2].tick_params(labelsize=25)
 				axes[i//2,i%2].text(0.5,0.8,Det[i],fontsize=25,
 								transform=axes[i//2,i%2].transAxes)
@@ -1531,7 +1531,7 @@ class GRB:
 									totalNet_median_part.max(),num=100)
 					axes[i//2,i%2].plot(x,Y.pdf(x)*totalNet.size*(bins[1]-bins[0]),
 								label='Gaussian Distribution',
-								drawstyle='--',lw=3.0,color='tab:orange')
+								linestyle='--',lw=3.0,color='tab:orange')
 					axes[i//2,i%2].tick_params(labelsize=25)
 					axes[i//2,i%2].text(0.05,0.85,Det[i],fontsize=25,
 									transform=axes[i//2,i%2].transAxes)
@@ -1635,7 +1635,7 @@ class GRB:
 										for ch in np.arange(ch1,ch2+1) ])
 				totalBase = np.sum(cBase,axis=0)
 				plottime = self.tbins[:-1]+self.binwidth/2.0
-				axes[i//2,i%2].plot(plottime,totalBase,drawstyle='--',
+				axes[i//2,i%2].plot(plottime,totalBase,linestyle='--',
 									lw=4.0, color='tab:orange')
 				axes[i//2,i%2].set_xlim([viewt1,viewt2])
 				axes[i//2,i%2].tick_params(labelsize=25)
@@ -1894,10 +1894,10 @@ class GRB:
 			x = np.sqrt(emax*emin)
 			axes[i//2,i%2].errorbar(x,bkg_diff,
 						yerr=bkg_uncertainty/energy_diff,
-						drawstyle='None',color='blue')
+						linestyle='None',color='blue')
 			axes[i//2,i%2].errorbar(x,total_diff,
 						yerr=total_uncertainty/energy_diff,
-						drawstyle='None',color='red')
+						linestyle='None',color='red')
 			bkg_diff = np.concatenate(([bkg_diff[0]],bkg_diff))
 			total_diff = np.concatenate(([total_diff[0]],total_diff))
 			axes[i//2,i%2].plot(energy_bins,bkg_diff,
