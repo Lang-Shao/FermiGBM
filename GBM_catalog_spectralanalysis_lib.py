@@ -531,8 +531,8 @@ def met2utc_shao(myMET):
 		#'2015-06-30 23:59:60' MET=457401603.000000
 		#'2016-12-31 23:59:60' MET=504921604.000000
 		for i in range(myMETsize):
-			if myMET[i] < 239772945.000: # valid data start 9 weeks after the mission starts
-				print('**** ERROR: One of the MET TIME (array) is not valid!!! ****',myMET[i])
+			if myMET[i] < 237693816.736: # valid data start at 2008-07-14 02:03:35.737
+				print('**** ERROR: value Met must be larger than 237693816.736!!! ****')
 			elif myMET[i] <= 252460801.000:
 				utc_tt_diff[i] = 33.0
 			elif myMET[i] <= 362793602.000:
@@ -546,8 +546,8 @@ def met2utc_shao(myMET):
 		myTimeGPS = Time(np.array(myMET)+UTC0.gps-utc_tt_diff,format='gps')
 		return myTimeGPS.iso
 	elif np.isscalar(myMET):
-		if myMET < 239772945.000: # valid data start 9 weeks after the mission starts
-			print('**** ERROR: the scalar MET TIME is not valid!!! ****',myMET)
+		if myMET < 237693816.736: # # valid data start at 2008-07-14 02:03:35.737
+			print('**** ERROR: value Met must be larger than 237693816.736!!! ****')
 		elif myMET <= 252460801.000:
 			utc_tt_diff = 33.0
 		elif myMET <= 362793602.000:
@@ -776,9 +776,9 @@ def copy_rspI(bnname,det,outfile):
 	os.system('cp '+rspfile+' '+outfile)
 	
 	
-########################	
-# BEGIN base class GRB #
-########################
+###################	
+# BEGIN class GRB #
+###################
 
 class GRB:
 	def __init__(self, bnname, resultdir):
@@ -899,7 +899,7 @@ class GRB:
 			dec_obj = hdu['Primary'].header['DEC_OBJ']
 			grb = SkyCoord(ra_obj, dec_obj, unit='deg',frame = 'icrs')
 			for seq, t_met in enumerate(timelist_met):
-				timestr = met2utc_shao(t_met)
+				timestr = met2utc_shao(t_met,self.bnname)
 				t = Time(timestr,format='iso',scale='utc')
 				timestrisot = t.isot
 				year = timestr[:4]
