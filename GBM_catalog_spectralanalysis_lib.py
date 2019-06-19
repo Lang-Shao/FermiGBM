@@ -927,7 +927,7 @@ class GRB:
 										show_bodies=True, BGO=False, map=map)
 				x,y=map(grb.ra.value,grb.dec.value)
 				label='  '+self.bnname
-				plt.text(x, y, label, fontsize=12)
+				plt.text(x, y, label, fontsize=10)
 				az1 = np.arange(0,360,30)
 				zen1 = np.zeros(az1.size)+2
 				azname = []
@@ -946,7 +946,7 @@ class GRB:
 					mysource = SkyCoord(ra, dec, frame = 'icrs')
 					x, y = map(mysource.ra.deg,mysource.dec.deg)
 					map.plot(x, y, color='r',marker='o',markersize=20,ls='None')
-					plt.text(x, y, '    GRB', fontsize=10)
+					plt.text(x, y, '    GBM catalog', fontsize=10)
 				plt.title(timestr+' (T0+'+str((seq*10-10))+' s)',fontsize=25)
 				plt.savefig(self.resultdir+'/skymap_'+str(seq)+'.png')
 				plt.close()
