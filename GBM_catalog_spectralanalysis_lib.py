@@ -532,7 +532,7 @@ def met2utc_shao(myMET):
 		#'2016-12-31 23:59:60' MET=504921604.000000
 		for i in range(myMETsize):
 			if myMET[i] < 239772945.000: # valid data start 9 weeks after the mission starts
-				print('**** ERROR: One of the MET TIME is not valid!!! ****')
+				print('**** ERROR: One of the MET TIME (array) is not valid!!! ****',myMET[i])
 			elif myMET[i] <= 252460801.000:
 				utc_tt_diff[i] = 33.0
 			elif myMET[i] <= 362793602.000:
@@ -547,7 +547,7 @@ def met2utc_shao(myMET):
 		return myTimeGPS.iso
 	elif np.isscalar(myMET):
 		if myMET < 239772945.000: # valid data start 9 weeks after the mission starts
-			print('**** ERROR: One of the MET TIME is not valid!!! ****')
+			print('**** ERROR: the scalar MET TIME is not valid!!! ****',myMET)
 		elif myMET <= 252460801.000:
 			utc_tt_diff = 33.0
 		elif myMET <= 362793602.000:
@@ -906,7 +906,11 @@ class GRB:
 				yearshort = timestr[2:4]
 				month = timestr[5:7]
 				day = timestr[8:10]
-				dailydatabasedir = get_dailydatabasedir()
+				dailydatabasedir_ab = get_dailydatabasedirs()
+				if int(year) >= 2013:
+					dailydatabasedir = dailydatabasedir_ab[0]
+				else:
+					dailydatabasedir = dailydatabasedir_ab[1]
 				localdir = dailydatabasedir+'/'+year+'/'+month+'/'+day+'/'
 				filef = 'glg_poshist_all_'+yearshort+month+day
 				filelist = glob(localdir+filef+'*')

@@ -10,10 +10,11 @@ def get_databasedir():
 	#databasedir = '/home/lang/work/GBM/burstdownload/data/'
 	return databasedir
 
-def get_dailydatabasedir():
-	dailydatabasedir = '/diska/Fermi_GBM_daily/data/'
+def get_dailydatabasedirs():
+	dailydatabasedir_a = '/diska/Fermi_GBM_daily/data/'
+	dailydatabasedir_b = '/diskb/Database/Fermi/Fermi_GBM_daily/data/'
 	#dailydatabasedir = '/home/lang/work/GBM/daily/data/'
-	return dailydatabasedir
+	return dailydatabasedir_a, dailydatabasedir_b
 
 def get_ncore():
 	#ncore = 3
