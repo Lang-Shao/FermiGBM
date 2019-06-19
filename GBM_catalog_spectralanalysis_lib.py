@@ -899,7 +899,7 @@ class GRB:
 			dec_obj = hdu['Primary'].header['DEC_OBJ']
 			grb = SkyCoord(ra_obj, dec_obj, unit='deg',frame = 'icrs')
 			for seq, t_met in enumerate(timelist_met):
-				timestr = met2utc_shao(t_met,self.bnname)
+				timestr = met2utc_shao(t_met)
 				t = Time(timestr,format='iso',scale='utc')
 				timestrisot = t.isot
 				year = timestr[:4]
