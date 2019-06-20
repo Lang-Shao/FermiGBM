@@ -915,7 +915,7 @@ class GRB:
 				filef = 'glg_poshist_all_'+yearshort+month+day
 				filelist = glob(localdir+filef+'*')
 				if len(filelist) != 1:
-					print('***ERROR:  check if '+filef+' is available***')
+					#print('***ERROR:  check if '+filef+' is available***')
 					break
 				filelink = filelist[0]
 				qsj,pos = find_right_list(filelink,t_met)
@@ -951,10 +951,9 @@ class GRB:
 				plt.title(timestr+' (T0+'+str((seq*10-10))+' s)',fontsize=25)
 				plt.savefig(self.resultdir+'/skymap_'+str(seq)+'.png')
 				plt.close()
-			try:
+			if os.path.exists(self.resultdir+'/skymap_0.png'):
 				os.system("convert -delay 40 -resize 800x600 -loop 0 "+self.resultdir+"/skymap_*.png "+self.resultdir+"/skymap_animated.gif")
-			except:
-				pass
+
 		
 	def base(self,baset1=-50,baset2=300,binwidth=0.064):
 		self.baset1 = np.max([self.GTI1,baset1])
