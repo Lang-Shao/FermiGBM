@@ -508,16 +508,18 @@ def open_fit(file_link):
 	pos_z = f[1].data.field(10)
 	return time,qsj1,qsj2,qsj3,qsj4,pos_x,pos_y,pos_z
 
-def find_right_list(file_link,met):
+def find_right_list(file_link, met):
 	time,qsj1,qsj2,qsj3,qsj4,pos_x,pos_y,pos_z = open_fit(file_link)
 	dt = (time - met)**2
 	dt = np.array(dt)
 	dtmin=dt.min()
-	if dtmin >= 1: sys.exit('poshist file is not complete at (MET): ', met, file_link)
-	index = np.where(dt == dtmin)
-	qsj = np.array([qsj1[index][0],qsj2[index][0],qsj3[index][0],qsj4[index][0]])
-	pos = np.array([pos_x[index][0],pos_y[index][0],pos_z[index][0]])
-	return qsj,pos
+	if dtmin >= 1: 
+		qsj, pos = None, None
+	else:
+		index = np.where(dt == dtmin)
+		qsj = np.array([qsj1[index][0],qsj2[index][0],qsj3[index][0],qsj4[index][0]])
+		pos = np.array([pos_x[index][0],pos_y[index][0],pos_z[index][0]])
+	return qsj, pos
 
 def met2utc_shao(myMET):
 	UTC0 = Time('2001-01-01',format='iso',scale='utc')
@@ -918,7 +920,9 @@ class GRB:
 					#print('***ERROR:  check if '+filef+' is available***')
 					break
 				filelink = filelist[0]
-				qsj,pos = find_right_list(filelink,t_met)
+				qsj, pos = find_right_list(filelink,t_met)
+				if not qsj:
+					break
 				myGBM = GBM(qsj,pos*u.m,timestrisot)		
 				fig = plt.figure(figsize=(20,10))
 				ax = fig.add_subplot(111)
