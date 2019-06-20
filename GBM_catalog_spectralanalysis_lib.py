@@ -921,7 +921,7 @@ class GRB:
 					break
 				filelink = filelist[0]
 				qsj, pos = find_right_list(filelink, t_met)
-				if qsj == None:
+				if type(qsj) == type(None):
 					break
 				myGBM = GBM(qsj,pos*u.m,timestrisot)		
 				fig = plt.figure(figsize=(20,10))
